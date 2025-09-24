@@ -251,6 +251,44 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_subjets",
             "mass_boostedtaus",
             "nsubjets_perfatjets",
+
+            "mass_mt",
+            "msoftdrop_mt",
+            "globalParT_massVisApplied_mt",
+            "globalParT_massResApplied_mt",
+            "particleNet_mass_legacy_mt",
+            "isDauTau_mt",
+            "dau0_pt_mt",
+            "dau1_pt_mt",
+            "dau0_eta_mt",
+            "dau1_eta_mt",
+            "dau0_phi_mt",
+            "dau1_phi_mt",
+            "dau0_mass_mt",
+            "dau1_mass_mt",
+            "ntaus_perfatjets_mt",
+            "mass_subjets_mt",
+            "mass_boostedtaus_mt",
+            "nsubjets_perfatjets_mt",
+
+            "mass_et",
+            "msoftdrop_et",
+            "globalParT_massVisApplied_et",
+            "globalParT_massResApplied_et",
+            "particleNet_mass_legacy_et",
+            "isDauTau_et",
+            "dau0_pt_et",
+            "dau1_pt_et",
+            "dau0_eta_et",
+            "dau1_eta_et",
+            "dau0_phi_et",
+            "dau1_phi_et",
+            "dau0_mass_et",
+            "dau1_mass_et",
+            "ntaus_perfatjets_et",
+            "mass_subjets_et",
+            "mass_boostedtaus_et",
+            "nsubjets_perfatjets_et",
         ]
 
         self.skim_vars["FatJet"] = {
@@ -406,7 +444,7 @@ class bbtautauSkimmer(SkimmerABC):
         #     isData=isData,
         # )
 
-        fatjets = objects.get_CA_MASS(fatjets, boostedtaus, met, subjets)
+        fatjets = objects.get_CA_MASS(fatjets, boostedtaus, met, subjets, muons, electrons)
         print("CA mass", f"{time.time() - start:.2f}")
 
         #########################
