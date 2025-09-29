@@ -94,14 +94,14 @@ def gen_selection_HHbbtautau(
     GenTauVars["GenTauhm"] = ((tauh == 1) & (taumu == 1)).to_numpy()
     GenTauVars["GenTauhe"] = ((tauh == 1) & (taue == 1)).to_numpy()
 
-    fatjet gen matching
+    #fatjet gen matching
     Hbb = higgs[ak.sum(is_bb, axis=2) == 2]
     Hbb = ak.pad_none(Hbb, 1, axis=1, clip=True)[:, 0]
 
     Htt = higgs[ak.sum(is_tt, axis=2) == 2]
     Htt = ak.pad_none(Htt, 1, axis=1, clip=True)[:, 0]
 
-    TODO: check more than just the leading two fatjets!
+    #TODO: check more than just the leading two fatjets!
     bbdr = fatjets.delta_r(Hbb)
     ttdr = fatjets.delta_r(Htt)
 
