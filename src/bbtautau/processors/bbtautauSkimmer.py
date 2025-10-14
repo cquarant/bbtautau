@@ -238,6 +238,9 @@ class bbtautauSkimmer(SkimmerABC):
 
         #CA variables
         ca_vars = [
+            "mass_merged",
+            "Tauflag",
+
             "mass",
             "msoftdrop",
             "globalParT_massVisApplied",

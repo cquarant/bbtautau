@@ -14,8 +14,10 @@ MODEL_DIR = Path(
 )
 CLASSIFIER_DIR = Path("/home/users/lumori/bbtautau/src/bbtautau/postprocessing/classifier/")
 
-data_dir_2022 = "/ceph/cms/store/user/rkansal/bbtautau/skimmer/25Apr17bbpresel_v12_private_signal"
-data_dir_otheryears = "/ceph/cms/store/user/rkansal/bbtautau/skimmer/25Apr24Fix_v12_private_signal"
+#data_dir_2022 = "/ceph/cms/store/user/rkansal/bbtautau/skimmer/25Apr17bbpresel_v12_private_signal"
+data_dir_2022 = "/eos/user/j/jinwa/bbtautau/skimmer/24Nov7Signal_v12_private_signal"
+data_dir_otheryears = "/eos/user/j/jinwa/bbtautau/skimmer/24Nov7Signal_v12_private_signal"
+#data_dir_otheryears = "/ceph/cms/store/user/rkansal/bbtautau/skimmer/25Apr24Fix_v12_private_signal"
 
 DATA_PATHS = {
     "2022": {

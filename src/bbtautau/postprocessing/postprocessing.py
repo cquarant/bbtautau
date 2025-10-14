@@ -522,6 +522,13 @@ def get_columns(
             ("ak8FatJetParTmassResApplied", 3),
             ("ak8FatJetParTmassVisApplied", 3),
             ("ak8FatJetMsd", 3),
+            ("ak8FatJetCAmass", 3),
+            ("ak8FatJetCAmass_et", 3),
+            ("ak8FatJetCAmass_mt", 3),
+            ("ak8FatJetCAmsoftdrop", 3),
+            ("ak8FatJetCAglobalParT_massVisApplied", 3),
+            ("ak8FatJetCAglobalParT_massResApplied", 3),
+            ("ak8FatJetCAparticleNet_mass_legacy", 3),
         ]
 
     if ParT_taggers:

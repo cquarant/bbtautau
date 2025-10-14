@@ -109,7 +109,7 @@ SAMPLES = {
         isSignal=False,
     ),
     "ggfbbtt": Sample(
-        selector=hh_vars.bbtt_sigs["ggfbbtt"],
+        selector=hh_vars.bbtt_sigs["bbtt"],
         label=r"ggF HHbb$\tau\tau$",
         isSignal=True,
     ),

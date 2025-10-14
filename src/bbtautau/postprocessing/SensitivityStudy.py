@@ -31,14 +31,21 @@ from postprocessing import (
     tt_filters,
 )
 from Samples import CHANNELS
-from skopt import gp_minimize
+
+import os
+
+if os.environ.get("NO_DATA", "0") == "1":
+    for ch in ["hh", "hm", "he"]:  # 按需挑
+        if ch in CHANNELS:
+            CHANNELS[ch].data_samples = []
+#from skopt import gp_minimize
 
 from bbtautau.postprocessing import utils
 from bbtautau.postprocessing.plotting import (
     plot_optimization_sig_eff,
     plot_optimization_thresholds,
 )
-from bbtautau.postprocessing.rocUtils import ROCAnalyzer
+#from bbtautau.postprocessing.rocUtils import ROCAnalyzer
 from bbtautau.userConfig import DATA_PATHS, MODEL_DIR, SHAPE_VAR
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -298,7 +305,7 @@ class Analyser:
         print(f"ROCs computed and plotted for years {years} and signals {self.sig_key_channel}.")
 
     def plot_mass(self, years):
-        for key in [self.sig_key_channel, "data"]:
+        for key in [self.sig_key_channel]:
             print(f"Plotting mass for {key}")
             if key == self.sig_key_channel:
                 events = pd.concat([self.events_dict[year][key].events for year in years])
@@ -343,14 +350,37 @@ class Analyser:
                 for j, (mkey, mlabel) in enumerate(
                     zip(
                         [
-                            "ak8FatJetMsd",
-                            "ak8FatJetPNetmassLegacy",
-                            "ak8FatJetParTmassResApplied",
-                            "ak8FatJetParTmassVisApplied",
+                            # "ak8FatJetMsd",
+                            # "ak8FatJetPNetmassLegacy",
+                            # "ak8FatJetParTmassResApplied",
+                            # "ak8FatJetParTmassVisApplied",
+                            "ak8FatJetCAmass",
+                            "ak8FatJetCAmass_mt",
+                            "ak8FatJetCAmass_et",
+                            # "ak8FatJetCAmsoftdrop",
+                            #"ak8FatJetCAglobalParT_massVis",
+                            #"ak8FatJetCAglobalParT_massRes",
+                            # "ak8FatJetCAglobalParT_massVisApplied",
+                            # "ak8FatJetCAglobalParT_massResApplied",
+                            # "ak8FatJetCAparticleNet_mass_legacy",
                         ],
-                        ["SoftDrop", "PNetLegacy", "ParT Res", "ParT Vis"],
+                        # ["SoftDrop", "PNetLegacy", "ParT Res", "ParT Vis", "CA mass",
+                        # "CA SoftDrop", "CA ParT Vis", "CA ParT Res", "CA PNetLegacy"],
+                        [ "CA mass", "CA mass mt", "CA mass et",],
                     )
                 ):
+
+                    #add for check no-matching
+                    mask_np = np.asarray(mask, dtype=bool)
+                    missing_count = int(((events[mkey].to_numpy() == -999) & mask_np).sum())
+                    total_count = int(mask_np.sum())
+                    if total_count > 0:
+                        missing_ratio = missing_count / total_count * 100
+                    else:
+                        missing_ratio = 0
+                    print(f"[{jlabel}] {mkey}: {missing_count} missing "
+                        f"({missing_ratio:.2f}% of selected events)")
+
                     ax.hist(
                         self.get_jet_vals(events[mkey], mask),
                         bins=bins,
@@ -370,7 +400,7 @@ class Analyser:
                 hep.cms.label(
                     ax=ax,
                     label="Preliminary",
-                    data=key == "data",
+                    data= False,
                     year="2022-23" if years == hh_vars.years else "+".join(years),
                     com="13.6",
                     fontsize=20,
