@@ -357,6 +357,7 @@ class Analyser:
                             "ak8FatJetCAmass",
                             "ak8FatJetCAmass_mt",
                             "ak8FatJetCAmass_et",
+                            "ak8FatJetCAmass_merged"
                             # "ak8FatJetCAmsoftdrop",
                             #"ak8FatJetCAglobalParT_massVis",
                             #"ak8FatJetCAglobalParT_massRes",
@@ -366,7 +367,7 @@ class Analyser:
                         ],
                         # ["SoftDrop", "PNetLegacy", "ParT Res", "ParT Vis", "CA mass",
                         # "CA SoftDrop", "CA ParT Vis", "CA ParT Res", "CA PNetLegacy"],
-                        [ "CA mass", "CA mass mt", "CA mass et",],
+                        [ "CA mass tt", "CA mass mt", "CA mass et","CA mass"],
                     )
                 ):
 
