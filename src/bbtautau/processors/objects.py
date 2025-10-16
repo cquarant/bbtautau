@@ -687,7 +687,7 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
 
         output_map = {
-            # merged：et → mt → hh；且每个通道 subjet → boosted （高优先级写在后面覆盖）
+            # merged：et → mt → hh；eachchannel: subjet → boosted 
             "CA_mass_merged": [
                 ((~no1subjet) & (~no1electron), mass_subjet_et),
                 ((~no1tau)    & (~no1electron), mass_boostedtau_et),

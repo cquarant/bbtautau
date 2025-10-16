@@ -452,7 +452,9 @@ class bbtautauSkimmer(SkimmerABC):
         #     isData=isData,
         # )
 
-        fatjets = objects.get_CA_MASS(fatjets, boostedtaus, met, subjets, muons, electrons)
+
+        # fatjets = objects.get_CA_MASS(fatjets, boostedtaus, met, subjets, muons, electrons)
+        fatjets = objects.get_CA_MASS(fatjets, taus, met, subjets, muons, electrons)
         print("CA mass", f"{time.time() - start:.2f}")
 
         #########################
