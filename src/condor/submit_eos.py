@@ -203,10 +203,11 @@ def render_sh(sh_path: Path, eos_user_path: str, tag: str, nano_version: str, re
         chunksize=run_kwargs["chunksize"],
         nano_version=run_kwargs["nano_version"],
         region=run_kwargs["region"],
-        save_root_flag=save_root_flag,
-        save_systs_flag=save_systs_flag,
-        bb_preselection_flag=bb_preselection_flag,
+        save_root_flag_toggle=save_root_flag_toggle,
+        save_systs_flag_toggle=save_systs_flag_toggle,
+        bb_preselection_toggle=bb_preselection_toggle,
     )
+
     write_text(sh_path, dedent(content), mode=0o755)
 
 def generate_for_one_combo(args, year: str, sample: str, subsample: str,
