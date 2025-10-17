@@ -52,7 +52,7 @@ log                     = {logs_dir}/$(ClusterId).log
 Queue 1
 """
 
-SH_TEMPLATE = r"""\
+SH_TEMPLATE = r"""
 #!/bin/bash
 
 # 本地 eos 路径
