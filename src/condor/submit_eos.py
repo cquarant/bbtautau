@@ -54,17 +54,14 @@ Queue 1
 
 SH_TEMPLATE = r"""\
 #!/bin/bash
-set -euo pipefail
 
+# 本地 eos 路径
 eos_base="{eos_base}"
 
 # 创建目录
 mkdir -p "${{eos_base}}/pickles" "${{eos_base}}/parquet" "${{eos_base}}/root" "${{eos_base}}/jobchecks"
 
-echo "[INFO] Using git branch: {git_branch}"
-echo "[INFO] Cloning https://github.com/{git_user}/bbtautau"
-
-# 拉代码 (最多重试3次)
+# 拉代码
 (
     r=3
     while ! git clone --single-branch --recursive --branch {git_branch} --depth=1 https://github.com/{git_user}/bbtautau
@@ -81,48 +78,24 @@ commithash=$(git rev-parse HEAD)
 echo "https://github.com/{git_user}/bbtautau/commit/${{commithash}}" > commithash.txt
 cp -f commithash.txt "${{eos_base}}/jobchecks/commithash_{job_index}.txt"
 
-# 安装（editable）
 pip install -e .
 cd boostedhh && pip install -e . && cd ..
 
 # 运行主代码
-python -u -W ignore src/run.py \
-    --year {year} \
-    --starti {starti} \
-    --endi {endi} \
-    --batch-size {batch_size} \
-    --file-tag {job_index} \
-    --samples {sample} \
-    --subsamples {subsample} \
-    --processor {processor} \
-    --maxchunks {maxchunks} \
-    --chunksize {chunksize} \
-    {save_root_flag} \
-    {save_systs_flag} \
-    --nano-version {nano_version} \
-    --region {region} \
-    {bb_preselection_flag}
+python -u -W ignore src/run.py --year {year} --starti {starti} --endi {endi} --batch-size {batch_size} --file-tag {job_index} \
+    --samples {sample} --subsamples {subsample} --processor {processor} \
+    --maxchunks {maxchunks} --chunksize {chunksize} --{save_root_flag_toggle} --{save_systs_flag_toggle} \
+    --nano-version {nano_version} --region {region} --{bb_preselection_toggle}
 
-# 拷贝输出（仅在存在匹配文件时才复制）
-shopt -s nullglob
-if compgen -G "num_batches*.txt" > /dev/null; then
-  cp -f num_batches*.txt "${{eos_base}}/jobchecks/"
-fi
-if compgen -G "outfiles/*" > /dev/null; then
-  cp -f outfiles/* "${{eos_base}}/pickles/out_{job_index}.pkl"
-fi
-if compgen -G "*.parquet" > /dev/null; then
-  cp -f *.parquet "${{eos_base}}/parquet/"
-fi
-if compgen -G "*.root" > /dev/null; then
-  cp -f *.root "${{eos_base}}/root/"
-fi
+# 拷贝输出
+cp -f num_batches*.txt "${{eos_base}}/jobchecks/"
+cp -f outfiles/* "${{eos_base}}/pickles/out_{job_index}.pkl"
+cp -f *.parquet "${{eos_base}}/parquet/"
+cp -f *.root "${{eos_base}}/root/"
 
-# 清理
-rm -f *.parquet *.root *.txt || true
-
-echo "[DONE] job {job_index} finished."
+rm -f *.parquet *.root *.txt
 """
+
 
 # -----------------------------
 # Helpers
@@ -208,9 +181,11 @@ def render_sh(sh_path: Path, eos_user_path: str, tag: str, nano_version: str, re
               year: str, subsample: str, job_index: int, git_user: str, git_branch: str,
               run_kwargs: dict):
     eos_base = f"/eos/user/{eos_user_path}/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
-    save_root_flag = "--no-save-root" if not run_kwargs.get("save_root", False) else "--save-root"
-    save_systs_flag = "--no-save-systematics" if not run_kwargs.get("save_systematics", False) else "--save-systematics"
-    bb_preselection_flag = "--fatjet-bb-preselection" if run_kwargs.get("fatjet_bb_preselection", False) else "--no-fatjet-bb-preselection"
+
+    save_root_flag_toggle = "save-root" if run_kwargs.get("save_root", False) else "no-save-root"
+    save_systs_flag_toggle = "save-systematics" if run_kwargs.get("save_systematics", False) else "no-save-systematics"
+    bb_preselection_toggle = "fatjet-bb-preselection" if run_kwargs.get("fatjet_bb_preselection", False) else "no-fatjet-bb-preselection"
+
 
     content = SH_TEMPLATE.format(
         eos_base=eos_base,
