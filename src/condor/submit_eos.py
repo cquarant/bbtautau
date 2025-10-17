@@ -103,7 +103,7 @@ python -u -W ignore src/run.py \
     --region {region} \
     {bb_preselection_flag}
 
-# 拷贝输出
+# 拷贝输出（仅在存在匹配文件时才复制）
 shopt -s nullglob
 if compgen -G "num_batches*.txt" > /dev/null; then
   cp -f num_batches*.txt "${{eos_base}}/jobchecks/"
