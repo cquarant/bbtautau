@@ -354,10 +354,18 @@ class Analyser:
                             # "ak8FatJetPNetmassLegacy",
                             # "ak8FatJetParTmassResApplied",
                             # "ak8FatJetParTmassVisApplied",
-                            "ak8FatJetCAmass",
-                            "ak8FatJetCAmass_mt",
-                            "ak8FatJetCAmass_et",
-                            "ak8FatJetCAmass_merged"
+                            # "ak8FatJetCAmass",
+                            # "ak8FatJetCAmass_mt",
+                            # "ak8FatJetCAmass_et",
+                            # "ak8FatJetCAmass_merged"
+
+                            "ak8FatJetCAmass_subjets_mt",
+                            "ak8FatJetCAmass_boostedtaus_mt",
+                            "ak8FatJetCAmass_subjets_et",
+                            "ak8FatJetCAmass_boostedtaus_et",
+                            "ak8FatJetCAmass_subjets",
+                            "ak8FatJetCAmass_boostedtaus",
+
                             # "ak8FatJetCAmsoftdrop",
                             #"ak8FatJetCAglobalParT_massVis",
                             #"ak8FatJetCAglobalParT_massRes",
@@ -367,7 +375,9 @@ class Analyser:
                         ],
                         # ["SoftDrop", "PNetLegacy", "ParT Res", "ParT Vis", "CA mass",
                         # "CA SoftDrop", "CA ParT Vis", "CA ParT Res", "CA PNetLegacy"],
-                        [ "CA mass tt", "CA mass mt", "CA mass et","CA mass"],
+                        #[ "CA mass tt", "CA mass mt", "CA mass et","CA mass"],
+                        [ "CA mass mt subjets", "CA mass mt taus", "CA mass et subjets",
+                        "CA mass et taus", "CA mass tt subjets", "CA mass tt taus"],
                     )
                 ):
 
