@@ -241,6 +241,11 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_merged",
             "Tauflag",
 
+            "one_elec_in_fatjet",
+            "one_muon_in_fatjet",
+            "one_elec",
+            "one_muon",
+
             "mass",
             "msoftdrop",
             "globalParT_massVisApplied",

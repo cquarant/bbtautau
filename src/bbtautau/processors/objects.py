@@ -428,6 +428,11 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
         "CA_mass_merged": (-999.0, float),
         "CA_Tauflag": (0, int),
 
+        "CA_one_elec_in_fatjet": (0, int),
+        "CA_one_muon_in_fatjet": (0, int),
+        "CA_one_elec": (0, int),
+        "CA_one_muon": (0, int),
+
         "CA_mass_boostedtaus": (-999.0, float),
         "CA_ntaus_perfatjets": (-1, int),
         "CA_mass_subjets": (-999.0, float),
@@ -544,6 +549,9 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
         n_matched_muons = ak.num(matched_muons_per_fatjet, axis=-1)
         no1muon = n_matched_muons < 1
 
+        n_muons = ak.num(muons_in_pairs, axis=-1)
+        no1muon_ori = n_muons < 1
+
         sorted_indices = ak.argsort(matched_muons_per_fatjet.pt, axis=-1, ascending=False)
         sorted_muons = matched_muons_per_fatjet[sorted_indices]
         top2_muons = ak.pad_none(sorted_muons, 2, axis=-1)[..., :2]
@@ -567,6 +575,9 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
         n_matched_electrons = ak.num(matched_electrons_per_fatjet, axis=-1)
         no1electron = n_matched_electrons < 1
+        
+        n_electrons = ak.num(electrons_in_pairs, axis=-1)
+        no1electron_ori = n_electrons < 1
 
         sorted_indices = ak.argsort(matched_electrons_per_fatjet.pt, axis=-1, ascending=False)
         sorted_electrons = matched_electrons_per_fatjet[sorted_indices]
@@ -772,6 +783,15 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
                 ((~no1tau)    & (~no1muon), 1),
             ],
 
+            "CA_one_muon_in_fatjet": [
+                (~no1muon, 1),
+            ],
+
+            "CA_one_muon": [
+                (~no1muon_ori, 1),
+            ],
+            
+
             "CA_dau0_pt_mt":  [
                 ((~no1subjet) & (~no1muon), subjet0_pt),
                 ((~no1tau)    & (~no1muon), tau0_pt),
@@ -836,6 +856,14 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
             "CA_isDauTau_et": [
                 ((~no1subjet) & (~no1electron), 2),
                 ((~no1tau)    & (~no1electron), 1),
+            ],
+
+            "CA_one_elec_in_fatjet": [
+                (~no1electron, 1),
+            ],
+
+            "CA_one_elec": [
+                (~no1electron_ori, 1),
             ],
 
             "CA_dau0_pt_et":  [
