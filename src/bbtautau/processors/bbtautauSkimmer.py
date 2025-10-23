@@ -246,6 +246,9 @@ class bbtautauSkimmer(SkimmerABC):
             "one_elec",
             "one_muon",
 
+            "mass_fatjet_et",
+            "mass_fatjet_mt",
+
             "mass",
             "msoftdrop",
             "globalParT_massVisApplied",

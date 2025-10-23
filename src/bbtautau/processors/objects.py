@@ -420,6 +420,51 @@ def CA_got(met_pt, met_phi, fatjets_mass, fatjets_masscorr, tau0_eta, tau1_eta, 
     mass = ak.where(invalid, -999, mass)
     return mass
 
+def calculate_invariant_mass(fatjets_mass, fatjets_pt, fatjets_eta, fatjets_phi, fatjets_masscorr,
+                             tau1_pt, tau1_eta, tau1_phi, 
+                             met_pt, met_phi):
+    invalid = (
+        (fatjets_mass == -999)
+        | (fatjets_pt == -999)
+        | (fatjets_eta == -999)
+        | (fatjets_phi == -999)
+        | (fatjets_masscorr == -999)
+        | (tau1_pt == -999)
+        | (tau1_eta == -999)
+        | (tau1_phi == -999)
+        | (met_pt == -999)
+        | (met_phi == -999)
+    )
+    
+    fatjets_mass = fatjets_mass * fatjets_masscorr
+
+    E_fatjet = np.sqrt(fatjets_pt**2 + fatjets_mass**2)
+    E_tau1 = np.sqrt(tau1_pt**2 + 0)
+    E_met = met_pt
+
+    px_fatjet = fatjets_pt * np.cos(fatjets_phi)
+    py_fatjet = fatjets_pt * np.sin(fatjets_phi)
+    pz_fatjet = fatjets_pt * np.sinh(fatjets_eta)
+
+    px_tau1 = tau1_pt * np.cos(tau1_phi)
+    py_tau1 = tau1_pt * np.sin(tau1_phi)
+    pz_tau1 = tau1_pt * np.sinh(tau1_eta)
+
+    px_met = met_pt * np.cos(met_phi)
+    py_met = met_pt * np.sin(met_phi)
+
+    px_total = px_fatjet + px_tau1 + px_met
+    py_total = py_fatjet + py_tau1 + py_met
+    pz_total = pz_fatjet + pz_tau1 
+
+    E_total = E_fatjet + E_tau1 + E_met
+
+    mass_squared = E_total**2 - (px_total**2 + py_total**2 + pz_total**2)
+    mass = np.sqrt(mass_squared)
+
+    mass = ak.where(invalid, -999, mass)
+    return mass
+
 
 def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: JetArray, muons: MuonArray, electrons: ElectronArray):
 
@@ -458,6 +503,8 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
         "CA_mass_subjets_mt": (-999.0, float),
         "CA_nsubjets_perfatjets_mt": (-1, int),
 
+        "CA_mass_fatjet_mt": (-999.0, float),
+
         "CA_mass_mt": (-999.0, float),
         "CA_msoftdrop_mt": (-999.0, float),
         "CA_globalParT_massVisApplied_mt": (-999.0, float),
@@ -477,6 +524,8 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
         "CA_ntaus_perfatjets_et": (-1, int),
         "CA_mass_subjets_et": (-999.0, float),
         "CA_nsubjets_perfatjets_et": (-1, int),
+
+        "CA_mass_fatjet_et": (-999.0, float),
 
         "CA_mass_et": (-999.0, float),
         "CA_msoftdrop_et": (-999.0, float),
@@ -525,6 +574,9 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
         fatjets_mass = fatjets.mass
         fatjets_msoftdrop = fatjets.msoftdrop
+        fatjets_pt = fatjets.pt
+        fatjets_eta = fatjets.eta
+        fatjets_phi = fatjets.phi
 
         fatjets_masscorr = fatjets.particleNet_massCorr
 
@@ -632,6 +684,9 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
 
         ##mu/elec. needchanging
+        mass_fatjet_et = calculate_invariant_mass(fatjets_mass, fatjets_pt, fatjets_eta, fatjets_phi, fatjets_masscorr, electron0_pt, electron0_eta, electron0_phi, met_pt, met_phi)
+        mass_fatjet_mt = calculate_invariant_mass(fatjets_mass, fatjets_pt, fatjets_eta, fatjets_phi, fatjets_masscorr, muon0_pt, muon0_eta, muon0_phi, met_pt, met_phi)
+
         mass_subjet_mt = CA_got(met_pt, met_phi, fatjets_mass, fatjets_masscorr, subjet0_eta, muon0_eta, subjet0_phi, muon0_phi, subjet0_pt, muon0_pt)
         msoftdrop_subjet_mt = CA_got(met_pt, met_phi, fatjets_msoftdrop, fatjets_masscorr, subjet0_eta, muon0_eta, subjet0_phi, muon0_phi, subjet0_pt, muon0_pt)
         globalParT_massVisApplied_subjet_mt = CA_got(met_pt, met_phi, fatjets_globalParT_massVisApplied, fake_corr, subjet0_eta, muon0_eta, subjet0_phi, muon0_phi, subjet0_pt, muon0_pt)
@@ -757,6 +812,7 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
             # mt（mu+X）：subjet → boosted
             "CA_mass_mt": [
+                (~no1muon, mass_fatjet_mt),
                 ((~no1subjet) & (~no1muon), mass_subjet_mt),
                 ((~no1tau)    & (~no1muon), mass_boostedtau_mt),
             ],
@@ -779,8 +835,13 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
             # matched 2 HPS boostedtaus: 1; matched 2 subjets: 2; none matching: 0
             "CA_isDauTau_mt": [
+                (~no1muon, 3),
                 ((~no1subjet) & (~no1muon), 2),
                 ((~no1tau)    & (~no1muon), 1),
+            ],
+
+            "CA_mass_fatjet_mt": [
+                (~no1muon, mass_fatjet_mt),
             ],
 
             "CA_one_muon_in_fatjet": [
@@ -832,6 +893,7 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
             # et（e+X）：subjet → boosted
             "CA_mass_et": [
+                (~no1electron, mass_fatjet_et),
                 ((~no1subjet) & (~no1electron), mass_subjet_et),
                 ((~no1tau)    & (~no1electron), mass_boostedtau_et),
             ],
@@ -854,12 +916,17 @@ def get_CA_MASS(fatjets: FatJetArray, taus: TauArray, met: MissingET, subjets: J
 
             # matched 2 HPS boostedtaus: 1; matched 2 subjets: 2; none matching: 0
             "CA_isDauTau_et": [
+                (~no1electron, 3),
                 ((~no1subjet) & (~no1electron), 2),
                 ((~no1tau)    & (~no1electron), 1),
             ],
 
             "CA_one_elec_in_fatjet": [
                 (~no1electron, 1),
+            ],
+
+            "CA_mass_fatjet_et": [
+                (~no1electron, mass_fatjet_et),
             ],
 
             "CA_one_elec": [
