@@ -267,6 +267,7 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_subjets",
             "mass_boostedtaus",
             "nsubjets_perfatjets",
+            "mass_fatjets",
 
             "mass_mt",
             "msoftdrop_mt",
@@ -286,6 +287,10 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_subjets_mt",
             "mass_boostedtaus_mt",
             "nsubjets_perfatjets_mt",
+            "mass_subjets_mt_01",
+            "muon_subjet_dr02",
+            "mass_subjets_mt_1",
+            "mass_subjets_mt_0",
 
             "mass_et",
             "msoftdrop_et",
@@ -305,6 +310,10 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_subjets_et",
             "mass_boostedtaus_et",
             "nsubjets_perfatjets_et",
+            "mass_subjets_et_01",
+            "elec_subjet_dr02",
+            "mass_subjets_et_1",
+            "mass_subjets_et_0",
         ]
 
         self.skim_vars["FatJet"] = {
