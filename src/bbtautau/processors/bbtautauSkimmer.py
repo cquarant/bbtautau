@@ -249,12 +249,12 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_fatjet_et",
             "mass_fatjet_mt",
 
+            "isDauTau",
             "mass",
             "msoftdrop",
             "globalParT_massVisApplied",
             "globalParT_massResApplied",
             "particleNet_mass_legacy",
-            "isDauTau",
             "dau0_pt",
             "dau1_pt",
             "dau0_eta",
