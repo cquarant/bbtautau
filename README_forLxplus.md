@@ -76,6 +76,13 @@ Please modify the filename accordingly, based on the output of voms-proxy-info -
 voms-proxy-init --voms cms --valid 168:00
 voms-proxy-info -all
 cd ..
+```
+In the `voms-proxy-info -all` output, search for the proxy path, for example:
+```
+path      : /tmp/x509up_u102682
+```
+then, using the path shown in the example, do:
+```
 export X509_USER_PROXY=/tmp/x509up_u154433 
 cp /tmp/x509up_u154433 ～/x509up_u154433
 ```
