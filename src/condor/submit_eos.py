@@ -11,8 +11,6 @@ Features:
 - Mirrors original naming and args: .../<year>_<subsample>_<jobindex>_eos.{sub,sh}
 - JDL uses x509 at /afs/... , Singularity + CVMFS, JobFlavour, getenv, and ClusterId-based logs.
 - SH clones repo, records commithash to EOS, runs src/run.py with correct [starti, endi), copies outputs to EOS.
-
-Author: ChatGPT (for Jin)
 """
 
 from __future__ import annotations
@@ -24,7 +22,7 @@ from pathlib import Path
 from textwrap import dedent
 import os
 import sys
-import yaml  # pip install pyyaml if没有；若不方便可改成按需分支导入
+import yaml  # pip install pyyaml
 
 # -----------------------------
 # Templates
@@ -54,47 +52,61 @@ Queue 1
 
 SH_TEMPLATE = r"""
 #!/bin/bash
+set -e
 
-# 本地 eos 路径
-eos_base="{eos_base}"
+# ========= 1) basic =========
+export HOME=$(pwd)
+export PATH="$HOME/.local/bin:$PATH"
 
-# 创建目录
-mkdir -p "${{eos_base}}/pickles" "${{eos_base}}/parquet" "${{eos_base}}/root" "${{eos_base}}/jobchecks"
+# EOS
+eos_target="root://eosuser.cern.ch//{eos_base}"
 
-# 拉代码
+mkdir -p outfiles
+
+# ========= 2) Clone =========
 (
     r=3
     while ! git clone --single-branch --recursive --branch {git_branch} --depth=1 https://github.com/{git_user}/bbtautau
     do
-        ((--r)) || exit
+        ((--r)) || exit 1
         sleep 60
         rm -rf bbtautau
-        echo "Retrying git clone..."
+        echo "Retry cloning..."
     done
 )
 
-cd bbtautau || exit
+cd bbtautau || exit 1
+
+# 记录 commit hash
 commithash=$(git rev-parse HEAD)
 echo "https://github.com/{git_user}/bbtautau/commit/${{commithash}}" > commithash.txt
-cp -f commithash.txt "${{eos_base}}/jobchecks/commithash_{job_index}.txt"
 
-pip install -e .
-cd boostedhh && pip install -e . && cd ..
+# 上传 hash（用 xrdcp，防止写锁）
+xrdcp -f commithash.txt ${{eos_target}}/jobchecks/commithash_{job_index}.txt || true
 
-# 运行主代码
-python -u -W ignore src/run.py --year {year} --starti {starti} --endi {endi} --batch-size {batch_size} --file-tag {job_index} \
+# ========= 3) Install (写在 HOME/.local，不污染系统) =========
+pip install --user -e .
+cd boostedhh && pip install --user -e . && cd ..
+
+# ========= 4) 运行 =========
+python -u -W ignore src/run.py \
+    --year {year} --starti {starti} --endi {endi} --batch-size {batch_size} --file-tag {job_index} \
     --samples {sample} --subsamples {subsample} --processor {processor} \
-    --maxchunks {maxchunks} --chunksize {chunksize} --{save_root_flag_toggle} --{save_systs_flag_toggle} \
-    --nano-version {nano_version} --region {region} --{bb_preselection_toggle}
+    --maxchunks {maxchunks} --chunksize {chunksize} \
+    --{save_root_flag_toggle} --{save_systs_flag_toggle} \
+    --nano-version {nano_version} --region {region} \
+    --{bb_preselection_toggle}
 
-# 拷贝输出
-cp -f num_batches*.txt "${{eos_base}}/jobchecks/"
-cp -f outfiles/* "${{eos_base}}/pickles/out_{job_index}.pkl"
-cp -f *.parquet "${{eos_base}}/parquet/"
-cp -f *.root "${{eos_base}}/root/"
+# ========= 5) 上传输出（全部用 xrdcp）=========
+xrdcp -f num_batches*.txt   ${{eos_target}}/jobchecks/ || true
+xrdcp -f outfiles/*         ${{eos_target}}/pickles/out_{job_index}.pkl
+xrdcp -f *.parquet          ${{eos_target}}/parquet/ || true
+xrdcp -f *.root             ${{eos_target}}/root/    || true
 
+# ========= 6) 清理本地 =========
 rm -f *.parquet *.root *.txt
 """
+
 
 
 # -----------------------------
@@ -289,6 +301,31 @@ def generate_for_one_combo(args, year: str, sample: str, subsample: str,
 
     print(f"[OK] Generated {njobs} jobs for {year}/{sample}/{subsample}")
 
+
+def generate_run_submit_sh(tag: str, nano_version: str, region: str,
+                           year: str, subsamples: list[str]):
+    submit_dir = Path("condor") / "skimmer" / f"{tag}_{nano_version}_{region}"
+    run_sh_path = submit_dir / "run_submit.sh"
+
+    lines = [
+        "#!/bin/bash",
+        "set -e",
+        'echo "Auto-generated run_submit.sh"',
+        "",
+    ]
+    for subsample in subsamples:
+        eos_base = f"/store/user/j/jinwa/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
+        for subdir in ["pickles", "parquet", "root", "jobchecks"]:
+            lines.append(f"xrdfs root://cmseos.fnal.gov/ mkdir -p {eos_base}/{subdir}")
+
+    lines.append('for f in ' + str(submit_dir) + '/*_eos.sub; do')
+    lines.append('    condor_submit "$f"')
+    lines.append('done')
+
+    run_sh_path.write_text("\n".join(lines), encoding="utf-8")
+    os.chmod(run_sh_path, 0o755)
+    print(f"[OK] Generated {run_sh_path}")
+
 # -----------------------------
 # CLI
 # -----------------------------
@@ -343,7 +380,8 @@ def main():
 
     args = parser.parse_args()
 
-    # If YAML provided, drive everything from it (like original submit.py)
+    all_subsamples_global = []
+
     if args.yaml:
         ypath = Path(args.yaml)
         if not ypath.exists():
@@ -362,6 +400,7 @@ def main():
             print(f"[YAML] Submitting for year {year}")
             for sample, sdict in tdict.items():
                 subsamples = sdict.get("subsamples", [])
+                all_subsamples_global.extend(subsamples)
                 files_per_job = sdict["files_per_job"]
                 # optional knobs (fallback to CLI defaults if missing)
                 args.maxchunks   = sdict.get("maxchunks", args.maxchunks)
@@ -388,6 +427,7 @@ def main():
                             subsample=subsample,
                             files_per_job=int(files_per_job),
                         )
+            generate_run_submit_sh(args.tag, args.nano_version, args.region, year, all_subsamples_global)
         return
 
     # Non-YAML path: use CLI samples/subsamples
@@ -398,6 +438,7 @@ def main():
         print(f"[CLI] Submitting for year {year}")
         for sample in args.samples:
             for subsample in args.subsamples:
+                all_subsamples_global.append(subsample)
                 generate_for_one_combo(
                     args=args,
                     year=str(year),
@@ -405,6 +446,8 @@ def main():
                     subsample=subsample,
                     files_per_job=args.files_per_job,
                 )
+        generate_run_submit_sh(args.tag, args.nano_version, args.region, year, all_subsamples_global)
+
 
 if __name__ == "__main__":
     main()
