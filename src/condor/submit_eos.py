@@ -313,8 +313,8 @@ def generate_run_submit_sh(tag: str, nano_version: str, region: str,
         'echo "Auto-generated run_submit.sh"',
         "",
     ]
-    
-    lines.append("mkdir -p logs")
+
+    lines.append("mkdir -p " + str(submit_dir) + "/logs")
 
     for subsample in subsamples:
         eos_base = f"/eos/user/j/jinwa/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
