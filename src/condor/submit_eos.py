@@ -314,9 +314,9 @@ def generate_run_submit_sh(tag: str, nano_version: str, region: str,
         "",
     ]
     for subsample in subsamples:
-        eos_base = f"/store/user/j/jinwa/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
+        eos_base = f"/eos/user/j/jinwa/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
         for subdir in ["pickles", "parquet", "root", "jobchecks"]:
-            lines.append(f"xrdfs root://cmseos.fnal.gov/ mkdir -p {eos_base}/{subdir}")
+            lines.append(f"xrdfs root://eosuser.cern.ch/ mkdir -p {eos_base}/{subdir}")
 
     lines.append('for f in ' + str(submit_dir) + '/*_eos.sub; do')
     lines.append('    condor_submit "$f"')
