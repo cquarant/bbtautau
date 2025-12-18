@@ -337,7 +337,7 @@ def generate_for_one_combo(
 
 
 def generate_run_submit_sh(
-    tag: str, nano_version: str, region: str, year: str, subsamples: list[str]
+    tag: str, nano_version: str, region: str, year: str, subsamples: list[str], eos_user_path: str
 ):
     submit_dir = Path("condor") / "skimmer" / f"{tag}_{nano_version}_{region}"
     run_sh_path = submit_dir / "run_submit.sh"
@@ -352,7 +352,7 @@ def generate_run_submit_sh(
     lines.append("mkdir -p " + str(submit_dir) + "/logs")
 
     for subsample in subsamples:
-        eos_base = f"/eos/user/c/cquarant/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
+        eos_base = f"/eos/user/{eos_user_path}/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
         for subdir in ["pickles", "parquet", "root", "jobchecks"]:
             lines.append(f"xrdfs root://eosuser.cern.ch/ mkdir -p {eos_base}/{subdir}")
 
@@ -493,7 +493,7 @@ def main():
                             files_per_job=int(files_per_job),
                         )
             generate_run_submit_sh(
-                args.tag, args.nano_version, args.region, year, all_subsamples_global
+                args.tag, args.nano_version, args.region, year, all_subsamples_global, args.eos_user_path
             )
         return
 
@@ -514,7 +514,7 @@ def main():
                     files_per_job=args.files_per_job,
                 )
         generate_run_submit_sh(
-            args.tag, args.nano_version, args.region, year, all_subsamples_global
+            args.tag, args.nano_version, args.region, year, all_subsamples_global, args.eos_user_path
         )
 
 
