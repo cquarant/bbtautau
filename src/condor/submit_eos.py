@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 Batch-generate HTCondor .sub (JDL) + matching _eos.sh scripts, like submit.py,
@@ -17,11 +16,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
-from pathlib import Path
-from textwrap import dedent
 import os
 import sys
+from pathlib import Path
+from textwrap import dedent
+
 import yaml  # pip install pyyaml
 
 # -----------------------------
@@ -108,10 +107,10 @@ rm -f *.parquet *.root *.txt
 """
 
 
-
 # -----------------------------
 # Helpers
 # -----------------------------
+
 
 def load_index_json(year: str) -> dict:
     path = Path(f"data/index_{year}.json")
@@ -122,6 +121,7 @@ def load_index_json(year: str) -> dict:
             return json.load(f)
         except Exception:
             return {}
+
 
 def infer_nfiles(index_obj: dict, sample: str, subsample: str) -> int | None:
     """
@@ -156,29 +156,41 @@ def infer_nfiles(index_obj: dict, sample: str, subsample: str) -> int | None:
     except Exception:
         return None
 
+
 def ceil_div(a: int, b: int) -> int:
     return (a + b - 1) // b
+
 
 def make_paths(tag: str, nano_version: str, region: str, year: str, subsample: str, job_index: int):
     base_rel = Path("condor") / "skimmer" / f"{tag}_{nano_version}_{region}"
     logs_dir = base_rel / "logs"
-    sh_name  = f"{year}_{subsample}_{job_index}_eos.sh"
+    sh_name = f"{year}_{subsample}_{job_index}_eos.sh"
     sub_name = f"{year}_{subsample}_{job_index}_eos.sub"
-    exe_rel  = base_rel / sh_name
-    sub_rel  = base_rel / sub_name
+    exe_rel = base_rel / sh_name
+    sub_rel = base_rel / sub_name
     return base_rel, logs_dir, exe_rel, sub_rel
+
 
 def write_text(path: Path, content: str, mode=0o644):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
     os.chmod(path, mode)
 
+
 # -----------------------------
 # Core generation
 # -----------------------------
 
-def render_jdl(sub_path: Path, exe_rel: Path, logs_dir: Path, x509_path: str, request_memory: int,
-               singularity_image: str, job_flavour: str):
+
+def render_jdl(
+    sub_path: Path,
+    exe_rel: Path,
+    logs_dir: Path,
+    x509_path: str,
+    request_memory: int,
+    singularity_image: str,
+    job_flavour: str,
+):
     content = JDL_TEMPLATE.format(
         exe_rel=str(exe_rel),
         logs_dir=str(logs_dir),
@@ -189,15 +201,31 @@ def render_jdl(sub_path: Path, exe_rel: Path, logs_dir: Path, x509_path: str, re
     )
     write_text(sub_path, content)
 
-def render_sh(sh_path: Path, eos_user_path: str, tag: str, nano_version: str, region: str,
-              year: str, subsample: str, job_index: int, git_user: str, git_branch: str,
-              run_kwargs: dict):
+
+def render_sh(
+    sh_path: Path,
+    eos_user_path: str,
+    tag: str,
+    nano_version: str,
+    region: str,
+    year: str,
+    subsample: str,
+    job_index: int,
+    git_user: str,
+    git_branch: str,
+    run_kwargs: dict,
+):
     eos_base = f"/eos/user/{eos_user_path}/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
 
     save_root_flag_toggle = "save-root" if run_kwargs.get("save_root", False) else "no-save-root"
-    save_systs_flag_toggle = "save-systematics" if run_kwargs.get("save_systematics", False) else "no-save-systematics"
-    bb_preselection_toggle = "fatjet-bb-preselection" if run_kwargs.get("fatjet_bb_preselection", False) else "no-fatjet-bb-preselection"
-
+    save_systs_flag_toggle = (
+        "save-systematics" if run_kwargs.get("save_systematics", False) else "no-save-systematics"
+    )
+    bb_preselection_toggle = (
+        "fatjet-bb-preselection"
+        if run_kwargs.get("fatjet_bb_preselection", False)
+        else "no-fatjet-bb-preselection"
+    )
 
     content = SH_TEMPLATE.format(
         eos_base=eos_base,
@@ -222,8 +250,10 @@ def render_sh(sh_path: Path, eos_user_path: str, tag: str, nano_version: str, re
 
     write_text(sh_path, dedent(content), mode=0o755)
 
-def generate_for_one_combo(args, year: str, sample: str, subsample: str,
-                           files_per_job: int, nfiles_hint: int | None = None):
+
+def generate_for_one_combo(
+    args, year: str, sample: str, subsample: str, files_per_job: int, nfiles_hint: int | None = None
+):
     index_obj = load_index_json(year)
     nfiles = nfiles_hint or infer_nfiles(index_obj, sample, subsample)
 
@@ -242,12 +272,16 @@ def generate_for_one_combo(args, year: str, sample: str, subsample: str,
     else:
         njobs = ceil_div(int(nfiles), files_per_job)
 
-    print(f"[PLAN] year={year} sample={sample} subsample={subsample} nfiles={nfiles} files_per_job={files_per_job} -> njobs={njobs}")
+    print(
+        f"[PLAN] year={year} sample={sample} subsample={subsample} nfiles={nfiles} files_per_job={files_per_job} -> njobs={njobs}"
+    )
 
     # Layout root
     for job_idx in range(njobs):
         starti = job_idx * files_per_job
-        endi = starti + files_per_job if nfiles is None else min(starti + files_per_job, int(nfiles))
+        endi = (
+            starti + files_per_job if nfiles is None else min(starti + files_per_job, int(nfiles))
+        )
 
         base_rel, logs_dir, exe_rel, sub_rel = make_paths(
             tag=args.tag,
@@ -302,8 +336,9 @@ def generate_for_one_combo(args, year: str, sample: str, subsample: str,
     print(f"[OK] Generated {njobs} jobs for {year}/{sample}/{subsample}")
 
 
-def generate_run_submit_sh(tag: str, nano_version: str, region: str,
-                           year: str, subsamples: list[str]):
+def generate_run_submit_sh(
+    tag: str, nano_version: str, region: str, year: str, subsamples: list[str]
+):
     submit_dir = Path("condor") / "skimmer" / f"{tag}_{nano_version}_{region}"
     run_sh_path = submit_dir / "run_submit.sh"
 
@@ -317,21 +352,23 @@ def generate_run_submit_sh(tag: str, nano_version: str, region: str,
     lines.append("mkdir -p " + str(submit_dir) + "/logs")
 
     for subsample in subsamples:
-        eos_base = f"/eos/user/j/jinwa/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
+        eos_base = f"/eos/user/c/cquarant/bbtautau/skimmer/{tag}_{nano_version}_{region}/{year}/{subsample}"
         for subdir in ["pickles", "parquet", "root", "jobchecks"]:
             lines.append(f"xrdfs root://eosuser.cern.ch/ mkdir -p {eos_base}/{subdir}")
 
-    lines.append('for f in ' + str(submit_dir) + '/*_eos.sub; do')
+    lines.append("for f in " + str(submit_dir) + "/*_eos.sub; do")
     lines.append('    condor_submit "$f"')
-    lines.append('done')
+    lines.append("done")
 
     run_sh_path.write_text("\n".join(lines), encoding="utf-8")
     os.chmod(run_sh_path, 0o755)
     print(f"[OK] Generated {run_sh_path}")
 
+
 # -----------------------------
 # CLI
 # -----------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -341,14 +378,28 @@ def main():
 
     # Required identity
     parser.add_argument("--tag", required=True, help="e.g. 24Nov7Signal")
-    parser.add_argument("--year", nargs="+", required=True, help="One or more years, e.g. 2022 2018")
+    parser.add_argument(
+        "--year", nargs="+", required=True, help="One or more years, e.g. 2022 2018"
+    )
     parser.add_argument("--samples", nargs="+", default=["HHbbtt"])
-    parser.add_argument("--subsamples", nargs="+", required=False, help="If omitted and YAML provided, read from YAML")
+    parser.add_argument(
+        "--subsamples",
+        nargs="+",
+        required=False,
+        help="If omitted and YAML provided, read from YAML",
+    )
 
     # Split control
-    parser.add_argument("--files-per-job", type=int, default=5, help="Default files per job (overridable via YAML)")
+    parser.add_argument(
+        "--files-per-job", type=int, default=5, help="Default files per job (overridable via YAML)"
+    )
     parser.add_argument("--njobs", type=int, default=None, help="Override number of jobs directly")
-    parser.add_argument("--nfiles", type=int, default=None, help="Override total number of files when index JSON is unavailable")
+    parser.add_argument(
+        "--nfiles",
+        type=int,
+        default=None,
+        help="Override total number of files when index JSON is unavailable",
+    )
 
     # run.py arguments
     parser.add_argument("--batch-size", type=int, default=20)
@@ -357,8 +408,12 @@ def main():
     parser.add_argument("--processor", default="skimmer")
     parser.add_argument("--nano-version", default="v12_private")
     parser.add_argument("--region", default="signal")
-    parser.add_argument("--fatjet-bb-preselection", dest="fatjet_bb_preselection", action="store_true")
-    parser.add_argument("--no-fatjet-bb-preselection", dest="fatjet_bb_preselection", action="store_false")
+    parser.add_argument(
+        "--fatjet-bb-preselection", dest="fatjet_bb_preselection", action="store_true"
+    )
+    parser.add_argument(
+        "--no-fatjet-bb-preselection", dest="fatjet_bb_preselection", action="store_false"
+    )
     parser.set_defaults(fatjet_bb_preselection=False)
     parser.add_argument("--save-root", dest="save_root", action="store_true")
     parser.add_argument("--no-save-root", dest="save_root", action="store_false")
@@ -368,14 +423,21 @@ def main():
     parser.set_defaults(save_systematics=False)
 
     # Infra / env
-    parser.add_argument("--x509", required=True, help="e.g. /afs/cern.ch/user/j/jinwa/x509up_u154433")
-    parser.add_argument("--eos-user-path", default="j/jinwa", help="EOS path fragment like j/jinwa")
+    parser.add_argument(
+        "--x509", required=True, help="e.g. /afs/cern.ch/user/j/jinwa/x509up_u154433"
+    )
+    parser.add_argument(
+        "--eos-user-path", default="c/cquarant", help="EOS path fragment like j/jinwa"
+    )
     parser.add_argument("--git-user", default="jinwang137")
     parser.add_argument("--git-branch", default="main")
 
     # JDL knobs
     parser.add_argument("--request-memory", type=int, default=4500)
-    parser.add_argument("--singularity-image", default="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest-py3.8")
+    parser.add_argument(
+        "--singularity-image",
+        default="/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/coffea-dask:latest-py3.8",
+    )
     parser.add_argument("--job-flavour", default="workday")
 
     # YAML batch option (compatible with your prior flow)
@@ -406,10 +468,10 @@ def main():
                 all_subsamples_global.extend(subsamples)
                 files_per_job = sdict["files_per_job"]
                 # optional knobs (fallback to CLI defaults if missing)
-                args.maxchunks   = sdict.get("maxchunks", args.maxchunks)
-                args.chunksize   = sdict.get("chunksize", args.chunksize)
-                args.batch_size  = sdict.get("batch_size", args.batch_size)
-                args.tag         = tag_backup  # keep outer tag
+                args.maxchunks = sdict.get("maxchunks", args.maxchunks)
+                args.chunksize = sdict.get("chunksize", args.chunksize)
+                args.batch_size = sdict.get("batch_size", args.batch_size)
+                args.tag = tag_backup  # keep outer tag
 
                 if isinstance(files_per_job, dict):
                     for subsample in subsamples:
@@ -430,7 +492,9 @@ def main():
                             subsample=subsample,
                             files_per_job=int(files_per_job),
                         )
-            generate_run_submit_sh(args.tag, args.nano_version, args.region, year, all_subsamples_global)
+            generate_run_submit_sh(
+                args.tag, args.nano_version, args.region, year, all_subsamples_global
+            )
         return
 
     # Non-YAML path: use CLI samples/subsamples
@@ -449,7 +513,9 @@ def main():
                     subsample=subsample,
                     files_per_job=args.files_per_job,
                 )
-        generate_run_submit_sh(args.tag, args.nano_version, args.region, year, all_subsamples_global)
+        generate_run_submit_sh(
+            args.tag, args.nano_version, args.region, year, all_subsamples_global
+        )
 
 
 if __name__ == "__main__":
