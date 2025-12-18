@@ -493,7 +493,12 @@ def main():
                             files_per_job=int(files_per_job),
                         )
             generate_run_submit_sh(
-                args.tag, args.nano_version, args.region, year, all_subsamples_global, args.eos_user_path
+                args.tag,
+                args.nano_version,
+                args.region,
+                year,
+                all_subsamples_global,
+                args.eos_user_path,
             )
         return
 
@@ -514,7 +519,12 @@ def main():
                     files_per_job=args.files_per_job,
                 )
         generate_run_submit_sh(
-            args.tag, args.nano_version, args.region, year, all_subsamples_global, args.eos_user_path
+            args.tag,
+            args.nano_version,
+            args.region,
+            year,
+            all_subsamples_global,
+            args.eos_user_path,
         )
 
 
