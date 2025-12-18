@@ -7,6 +7,7 @@ Authors: Ludovico Mori
 from __future__ import annotations
 
 from pathlib import Path
+
 from boostedhh import hh_vars
 from boostedhh.utils import Sample
 
@@ -85,8 +86,10 @@ Enhanced_ABCD_SAMPLES = {
         label="TT LL",
         isSignal=False,
     ),
-    "bbtt": Sample(
-        selector=hh_vars.bbtt_sigs["bbtt"],
+    # "bbtt": Sample(
+    #     selector=hh_vars.bbtt_sigs["bbtt"],
+    "ggfbbtt": Sample(
+        selector=hh_vars.bbtt_sigs["ggfbbtt"],
         label=r"ggF HHbb$\tau\tau$",
         isSignal=True,
     ),

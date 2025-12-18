@@ -331,18 +331,18 @@ def main(args: argparse.Namespace):
         # Create a copy of the base channel for this bmin
         CHANNEL = deepcopy(BASE_CHANNEL)
 
-    # TODO: 
-    # if systematics_path is not None:
-    #     try:
-    #         systematics_path.parent.mkdir(parents=True, exist_ok=True)
-    #         with systematics_path.open("wb") as syst_file:
-    #             pickle.dump(systematics, syst_file)
-    #         print("Saved systematics to", systematics_path)
-    #     except OSError as exc:
-    #         logger.warning("Failed to save systematics to %s: %s", systematics_path, exc)
+        # TODO:
+        # if systematics_path is not None:
+        #     try:
+        #         systematics_path.parent.mkdir(parents=True, exist_ok=True)
+        #         with systematics_path.open("wb") as syst_file:
+        #             pickle.dump(systematics, syst_file)
+        #         print("Saved systematics to", systematics_path)
+        #     except OSError as exc:
+        #         logger.warning("Failed to save systematics to %s: %s", systematics_path, exc)
 
-    # del templates
-    # gc.collect()
+        # del templates
+        # gc.collect()
 
         # Update cuts if sensitivity directory is provided. If not use cuts written in Samples.py (keep denomination in files as bmin1)
         if args.sensitivity_dir is not None:
@@ -431,13 +431,15 @@ def base_filter(test_mode: bool = False):
 
 
 def bb_filters(
-    in_filters: dict[str, list[tuple]] = None, num_fatjets: int = 3, bb_cut: float = 0.3,
+    in_filters: dict[str, list[tuple]] = None,
+    num_fatjets: int = 3,
+    bb_cut: float = 0.3,
     bb_disc: str = "ak8FatJetParTXbbvsQCD",
 ):
     """
     0.3 corresponds to roughly, 85% signal efficiency, 2% QCD efficiency (pT: 250-400, mSD:0-250, mRegLegacy:40-250)
     """
-    print('bb_filter', 'bb_disc', bb_disc)
+    print("bb_filter", "bb_disc", bb_disc)
     if in_filters is None:
         in_filters = base_filter(bb_disc=bb_disc)
 
@@ -1488,7 +1490,6 @@ def compute_bdt_preds(
     channel: Channel = None,
     test_mode: bool = False,
     save_dir: Path = None,
-    llsl_weight: float = 1,
 ) -> dict[str, dict[str, np.ndarray]]:
     """Compute BDT predictions for multiple years and samples.
 
@@ -2226,8 +2227,12 @@ def parse_args(parser=None):
         "--bb-disc",
         help="bb discriminator to optimize",
         default="ak8FatJetParTXbbvsQCD",
-        choices=["ak8FatJetParTXbbvsQCD", "ak8FatJetParTXbbvsQCDTop", "ak8FatJetPNetXbbvsQCDLegacy"],
-        type=str
+        choices=[
+            "ak8FatJetParTXbbvsQCD",
+            "ak8FatJetParTXbbvsQCDTop",
+            "ak8FatJetPNetXbbvsQCDLegacy",
+        ],
+        type=str,
     )
 
     args = parser.parse_args()
