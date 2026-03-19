@@ -121,7 +121,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
 
     fatjet0_selection = {  # noqa: RUF012
         "object_pt": 170,
-        "pt": 270,
+        "pt": 250,
         "eta": 2.4,
         "msd": 50,
         "mreg": 0,
@@ -129,7 +129,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
 
     fatjet1_selection = {  # noqa: RUF012
         "object_pt": 170,
-        "pt": 250,
+        "pt": 200,
         "eta": 2.4,
         "msd": 50,
         "mreg": 0,
@@ -137,14 +137,14 @@ class ttBarBackgroundSkimmer(SkimmerABC):
 
     fatjet_selection = {  # noqa: RUF012
         "object_pt": 170,
-        "pt": 270,
+        "pt": 250,
         "eta": 2.4,
         "msd": 50,
         "mreg": 0,
     }
 
     lepton_selection: ClassVar[dict[str, float]] = {
-        "ptcut": 10,
+        "ptcut": 30,
         "etacut": 2.5,
         "dzcut": 0.2,
         "dxycut": 0.045,
@@ -748,19 +748,19 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             "singleLepton", (ak.num(electrons) == 1) | (ak.num(muons) == 1), *selection_args
         )
 
-        # 1 AK8 jets passing primary selection, and no jets passing secondary selection
+        # 1 AK8 jets passing primary selection, and no jets passing only secondary selection
         add_selection(
             "ak8_singleFatjet",
-            (ak.num(fatjets) >= 1) & (ak.num(secondary_fatjets) == 1),
+            (ak.num(fatjets) == 1) & (ak.num(secondary_fatjets) == 1),
             *selection_args,
         )
         # >=1 AK8 jets with pT cut (230 GeV by default)
 
-        if self.fatjet_selection["pt"] >= 0:  # if < 0, don't apply any fatjet selection
-            cut_pt = (
-                np.sum(ak8FatJetVars["ak8FatJetPt"] >= self.fatjet_selection["pt"], axis=1) >= 1
-            )
-            add_selection("ak8_pt", cut_pt, *selection_args)
+        # if self.fatjet_selection["pt"] >= 0:  # if < 0, don't apply any fatjet selection
+        #     cut_pt = (
+        #         np.sum(ak8FatJetVars["ak8FatJetPt"] >= self.fatjet_selection["pt"], axis=1) >= 1
+        #     )
+        #     add_selection("ak8_pt", cut_pt, *selection_args)
 
         # # >=1 AK8 jets with mSD >= 40 GeV
         # cut_mass = np.sum(ak8FatJetVars["ak8FatJetMsd"] >= 40, axis=1) >= 1
