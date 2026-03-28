@@ -175,6 +175,7 @@ class bbtautauSkimmer(SkimmerABC):
         self._accumulator = processor.dict_accumulator({})
         self._fatjet_bb_preselection = fatjet_bb_preselection
         self._prescale_factor = prescale_factor
+        self._chunk_counter = 0
 
         # JMSR
         self.jmsr_vars = ["msoftdrop", "particleNet_mass_legacy", "ParTmassVis", "ParTmassRes"]
@@ -349,7 +350,23 @@ class bbtautauSkimmer(SkimmerABC):
         """Runs event processor for different types of jets"""
 
         start = time.time()
-        logging.info(f"Processing {events.metadata['dataset']} with {len(events)} events")
+        self._chunk_counter += 1
+        dataset_name = events.metadata.get("dataset", "unknown")
+        events_factory = events.behavior.get("__events_factory__", None)
+        partition_key = getattr(events_factory, "_partition_key", "unknown")
+        entry_start = events.metadata.get("entrystart", "?")
+        entry_stop = events.metadata.get("entrystop", "?")
+
+        logging.info(
+            "Chunk %s | dataset=%s | entries=[%s, %s) | nevents=%s | partition=%s",
+            self._chunk_counter,
+            dataset_name,
+            entry_start,
+            entry_stop,
+            len(events),
+            partition_key,
+        )
+        logging.info(f"Processing {dataset_name} with {len(events)} events")
         logging.info(f"# events {len(events)}")
 
         year = events.metadata["dataset"].split("_")[0]
