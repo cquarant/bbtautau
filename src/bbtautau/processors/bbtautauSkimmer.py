@@ -242,33 +242,27 @@ class bbtautauSkimmer(SkimmerABC):
         ca_vars = [
             "tau_number",
             "tau_number_in_fatjet",
-            
             "globalParT_massVisApplied_oneHPSTau",
             "globalParT_massVisApplied_oneHPSTau_thth",
             "globalParT_massVisApplied_oneHPSTauorMuon_thtm",
             "globalParT_massVisApplied_oneHPSTauorElectron_thte",
             "globalParT_massVisApplied_with_delta_axis_merged",
             "globalParT_massVisApplied_oneHPSTauorLepton_flag",
-
             "globalParT_massVisApplied_000_fatjetwithMET",
             "globalParT_massVisApplied_000_fatjet",
             "globalParT_massVisApplied_000_fatjet_MET_with_same_dirc",
-
             "mass_merged",
             "msoftdrop_merged",
             "globalParT_massVisApplied_merged",
             "globalParT_massResApplied_merged",
             "particleNet_mass_legacy_merged",
             "Tauflag",
-
             "one_elec_in_fatjet",
             "one_muon_in_fatjet",
             "one_elec",
             "one_muon",
-
             "mass_fatjet_et",
             "mass_fatjet_mt",
-
             "isDauTau",
             "mass",
             "msoftdrop",
@@ -288,7 +282,6 @@ class bbtautauSkimmer(SkimmerABC):
             "mass_boostedtaus",
             "nsubjets_perfatjets",
             "mass_fatjets",
-
             "mass_mt",
             "msoftdrop_mt",
             "globalParT_massVisApplied_mt",
@@ -311,7 +304,6 @@ class bbtautauSkimmer(SkimmerABC):
             "muon_subjet_dr02",
             "mass_subjets_mt_1",
             "mass_subjets_mt_0",
-
             "mass_et",
             "msoftdrop_et",
             "globalParT_massVisApplied_et",
@@ -357,6 +349,7 @@ class bbtautauSkimmer(SkimmerABC):
         """Runs event processor for different types of jets"""
 
         start = time.time()
+        logging.info(f"Processing {events.metadata['dataset']} with {len(events)} events")
         logging.info(f"# events {len(events)}")
 
         year = events.metadata["dataset"].split("_")[0]
@@ -488,7 +481,6 @@ class bbtautauSkimmer(SkimmerABC):
         #     jmr_values={key: [1.0, 0.9, 1.1] for key in self.jmsr_vars},
         #     isData=isData,
         # )
-
 
         # fatjets = objects.get_CA_MASS(fatjets, boostedtaus, met, subjets, muons, electrons)
         fatjets = objects.get_CA_MASS(fatjets, taus, met, subjets, muons, electrons)
@@ -767,9 +759,7 @@ class bbtautauSkimmer(SkimmerABC):
             add_selection("ak8_bb_preselection", cut_bb, *selection_args)
 
         if self._prescale_factor:
-            cut_prescale = (
-                events.event % self._prescale_factor == 0
-            )
+            cut_prescale = events.event % self._prescale_factor == 0
             add_selection("prescale", cut_prescale, *selection_args)
 
         print("Selection", f"{time.time() - start:.2f}")

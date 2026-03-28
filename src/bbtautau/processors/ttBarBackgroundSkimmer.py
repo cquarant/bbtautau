@@ -376,6 +376,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         """Runs event processor for different types of jets"""
 
         start = time.time()
+        logging.info(f"Processing {events.metadata['dataset']} with {len(events)} events")
         logging.info(f"# events {len(events)}")
 
         year = events.metadata["dataset"].split("_")[0]
