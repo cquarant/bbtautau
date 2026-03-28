@@ -119,27 +119,9 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         "glopart-v2": 0.3,
     }
 
-    fatjet0_selection = {  # noqa: RUF012
-        "_object_pt": 170,
-        "pt": 250,
-        "eta": 2.5,
-        "mass": 50,
-        "_msd": 0,
-        "mreg": 0,
-    }
-
-    fatjet1_selection = {  # noqa: RUF012
-        "_object_pt": 170,
-        "pt": 200,
-        "eta": 2.5,
-        "mass": 50,
-        "_msd": 0,
-        "mreg": 0,
-    }
-
     fatjet_selection = {  # noqa: RUF012
         "_object_pt": 170,
-        "pt": 250,
+        "pt": 200,
         "eta": 2.5,
         "mass": 50,
         "msd": 0,
@@ -170,7 +152,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         "pt": 25,
         "eta_max": 2.5,
         "id": "tight",
-        "dr_fatjets": 0.9,
+        "dr_fatjets": 1.0,
         "dr_leptons": 0.4,
     }
 
@@ -499,12 +481,8 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         print("ak8 JECs", f"{time.time() - start:.2f}")
 
         fatjets = objects.good_ak8jets(
-            all_fatjets, **self.fatjet0_selection, nano_version=self._nano_version
+            all_fatjets, **self.fatjet_selection, nano_version=self._nano_version
         )
-
-        # secondary_fatjets = objects.good_ak8jets(
-        #     all_fatjets, **self.fatjet1_selection, nano_version=self._nano_version
-        # )
 
         # VBF objects
         vbf_jets = objects.vbf_jets(
@@ -515,7 +493,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             **self.vbf_veto_lepton_selection,
         )
 
-        # # AK4 objects away from first two fatjets
+        # # AK4 objects away from first two fatjets AT THE SAME TIME
         ak4_jets_awayfromak8 = objects.ak4_jets_awayfromak8(
             jets,
             fatjets[:, :2],
@@ -523,6 +501,24 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             **self.ak4_bjet_selection,
             **self.ak4_bjet_lepton_selection,
             sort_by="nearest",
+        )
+
+        # # AK4 objects away from first fatjet only
+        ak4_jets_awayfromFJ0 = objects.ak4_jets_awayfromFJ(
+            jets,
+            fatjets[:, :1],
+            events,
+            **self.ak4_bjet_selection,
+            **self.ak4_bjet_lepton_selection,
+        )
+
+        # # AK4 objects away from second fatjet only
+        ak4_jets_awayfromFJ1 = objects.ak4_jets_awayfromFJ(
+            jets,
+            fatjets[:, 1:2],
+            events,
+            **self.ak4_bjet_selection,
+            **self.ak4_bjet_lepton_selection,
         )
 
         # # JMSR
@@ -611,6 +607,40 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         else:
             ak4JetAwayVars = {
                 f"AK4JetAway{key}": pad_val(ak4_jets_awayfromak8[var], 2, axis=1)
+                for (var, key) in jet_skimvars.items()
+            }
+
+        if len(ak4_jets_awayfromFJ0) == 4:
+            ak4JetAwayFJ0Vars = {
+                f"AK4JetAwayFJ0{key}": pad_val(
+                    ak.concatenate(
+                        [ak4_jets_awayfromFJ0[0][var], ak4_jets_awayfromFJ0[1][var]], axis=1
+                    ),
+                    2,
+                    axis=1,
+                )
+                for (var, key) in jet_skimvars.items()
+            }
+        else:
+            ak4JetAwayFJ0Vars = {
+                f"AK4JetAwayFJ0{key}": pad_val(ak4_jets_awayfromFJ0[var], 4, axis=1)
+                for (var, key) in jet_skimvars.items()
+            }
+
+        if len(ak4_jets_awayfromFJ1) == 2:
+            ak4JetAwayFJ1Vars = {
+                f"AK4JetAwayFJ1{key}": pad_val(
+                    ak.concatenate(
+                        [ak4_jets_awayfromFJ1[0][var], ak4_jets_awayfromFJ1[1][var]], axis=1
+                    ),
+                    2,
+                    axis=1,
+                )
+                for (var, key) in jet_skimvars.items()
+            }
+        else:
+            ak4JetAwayFJ1Vars = {
+                f"AK4JetAwayFJ1{key}": pad_val(ak4_jets_awayfromFJ1[var], 4, axis=1)
                 for (var, key) in jet_skimvars.items()
             }
 
@@ -719,6 +749,8 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             **trigMatchVars,
             **HLTVars,
             **ak4JetAwayVars,
+            **ak4JetAwayFJ0Vars,
+            **ak4JetAwayFJ1Vars,
             **leptonVars,
             **ak4JetVars,
             **ak8FatJetVars,
@@ -771,14 +803,21 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             "singleLepton", (ak.num(electrons) == 1) | (ak.num(muons) == 1), *selection_args
         )
 
-        # 1 AK8 jets passing primary selection, and no jets passing only secondary selection
-        add_selection(
-            "ak8_singleFatjet",
-            (ak.num(fatjets) == 1),  # & (ak.num(secondary_fatjets) == 1),
-            *selection_args,
-        )
-        # >=1 AK8 jets with pT cut (230 GeV by default)
+        # >=1 AK8 jets with mass cut (230 GeV by default)
+        if self.fatjet_selection["mass"] >= 0:  # if < 0, don't apply any fatjet selection
+            cut_mass = (
+                np.sum(ak8FatJetVars["ak8FatJetMass"] >= self.fatjet_selection["mass"], axis=1) >= 1
+            )
+            add_selection("ak8_mass", cut_mass, *selection_args)
 
+        # # 1 AK8 jets passing primary selection, and no jets passing only secondary selection
+        # add_selection(
+        #     "ak8_singleFatjet",
+        #     (ak.num(fatjets) == 1),  # & (ak.num(secondary_fatjets) == 1),
+        #     *selection_args,
+        # )
+
+        # # >=1 AK8 jets with pT cut (230 GeV by default)
         # if self.fatjet_selection["pt"] >= 0:  # if < 0, don't apply any fatjet selection
         #     cut_pt = (
         #         np.sum(ak8FatJetVars["ak8FatJetPt"] >= self.fatjet_selection["pt"], axis=1) >= 1

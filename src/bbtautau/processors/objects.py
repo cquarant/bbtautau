@@ -89,8 +89,8 @@ def good_ak8jets(
     _object_pt: float,  # select objects based on this
     pt: float,  # make event selections based on this
     eta: float,
-    mass: float,
-    _msd: float,
+    mass: float,  # noqa: ARG001
+    msd: float,  # noqa: ARG001
     mreg: float,  # noqa: ARG001
     nano_version: str,  # noqa: ARG001
     mreg_str: str = "particleNet_mass_legacy",  # noqa: ARG001
@@ -107,7 +107,7 @@ def good_ak8jets(
         jetidtight
         & (fatjets.pt > pt)
         & (abs(fatjets.eta) < eta)
-        & (fatjets.mass > mass)
+        # & (fatjets.mass > mass)
         # & (fatjets.msoftdrop > msd)  # | (fatjets[mreg_str] > mreg))
     )
     return fatjets[fatjet_sel]
@@ -329,6 +329,39 @@ def vbf_jets(
     return jets[ak4_sel][:, :2]
 
 
+def ak4_jets_awayfromFJ(
+    jets: JetArray,
+    fatjets: FatJetArray,
+    events,
+    pt: float,
+    id: str,  # noqa: ARG001
+    eta_max: float,
+    dr_fatjets: float,
+    dr_leptons: float,
+    electron_pt: float,
+    muon_pt: float,
+):
+    """AK4 jets nonoverlapping with AK8 fatjets"""
+    electrons = events.Electron
+    electrons = electrons[electrons.pt > electron_pt]
+
+    muons = events.Muon
+    muons = muons[muons.pt > muon_pt]
+
+    ak4_sel = (
+        (jets.pt >= pt)
+        & (np.abs(jets.eta) <= eta_max)
+        & (ak.all(jets.metric_table(fatjets) > dr_fatjets, axis=2))
+        & ak.all(jets.metric_table(electrons) > dr_leptons, axis=2)
+        & ak.all(jets.metric_table(muons) > dr_leptons, axis=2)
+    )
+
+    # Apply the geometric/lepton veto first, then sort the surviving jets by btag.
+    jets_away = jets[ak4_sel]
+    jets_pnetb = jets_away[ak.argsort(jets_away.btagPNetB, ascending=False)]
+    return jets_pnetb[:, :4]
+
+
 def ak4_jets_awayfromak8(
     jets: JetArray,
     fatjets: FatJetArray,
@@ -359,8 +392,9 @@ def ak4_jets_awayfromak8(
 
     # return top 2 jets sorted by btagPNetB
     if sort_by == "btag":
-        jets_pnetb = jets[ak.argsort(jets.btagPNetB, ascending=False)]
-        return jets_pnetb[ak4_sel][:, :2]
+        jets_away = jets[ak4_sel]
+        jets_pnetb = jets_away[ak.argsort(jets_away.btagPNetB, ascending=False)]
+        return jets_pnetb[:, :2]
     # return 2 jets closet to bbFatjet and ttFatjet, respectively
     elif sort_by == "nearest":
         jets_away = jets[ak4_sel]
