@@ -86,10 +86,11 @@ def get_ak8jets(fatjets: FatJetArray):
 # ak8 jet definition
 def good_ak8jets(
     fatjets: FatJetArray,
-    object_pt: float,  # select objects based on this
+    _object_pt: float,  # select objects based on this
     pt: float,  # make event selections based on this
     eta: float,
-    msd: float,
+    mass: float,
+    _msd: float,
     mreg: float,  # noqa: ARG001
     nano_version: str,  # noqa: ARG001
     mreg_str: str = "particleNet_mass_legacy",  # noqa: ARG001
@@ -102,13 +103,12 @@ def good_ak8jets(
     # Data does not have .neHEF etc. fields for fatjets, so above recipe doesn't work
     # Either way, doesn't matter since we only use tightID, and it is correct for eta < 2.7
     jetidtight = fatjets.isTight
-
     fatjet_sel = (
         jetidtight
-        & (fatjets.pt > object_pt)
         & (fatjets.pt > pt)
         & (abs(fatjets.eta) < eta)
-        & (fatjets.msoftdrop > msd)  # | (fatjets[mreg_str] > mreg))
+        & (fatjets.mass > mass)
+        # & (fatjets.msoftdrop > msd)  # | (fatjets[mreg_str] > mreg))
     )
     return fatjets[fatjet_sel]
 

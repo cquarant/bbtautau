@@ -120,26 +120,29 @@ class ttBarBackgroundSkimmer(SkimmerABC):
     }
 
     fatjet0_selection = {  # noqa: RUF012
-        "object_pt": 170,
+        "_object_pt": 170,
         "pt": 250,
-        "eta": 2.4,
-        "msd": 50,
+        "eta": 2.5,
+        "mass": 50,
+        "_msd": 0,
         "mreg": 0,
     }
 
     fatjet1_selection = {  # noqa: RUF012
-        "object_pt": 170,
+        "_object_pt": 170,
         "pt": 200,
-        "eta": 2.4,
-        "msd": 50,
+        "eta": 2.5,
+        "mass": 50,
+        "_msd": 0,
         "mreg": 0,
     }
 
     fatjet_selection = {  # noqa: RUF012
-        "object_pt": 170,
+        "_object_pt": 170,
         "pt": 250,
-        "eta": 2.4,
-        "msd": 50,
+        "eta": 2.5,
+        "mass": 50,
+        "msd": 0,
         "mreg": 0,
     }
 
@@ -461,10 +464,12 @@ class ttBarBackgroundSkimmer(SkimmerABC):
 
         # AK8 Jets
         num_ak8_jets = 3
-        fatjets = objects.get_ak8jets(events.FatJet)  # this adds all our extra variables e.g. TXbb
-        fatjets, jec_shifted_fatjetvars = JEC_loader.get_jec_jets(
+        all_fatjets = objects.get_ak8jets(
+            events.FatJet
+        )  # this adds all our extra variables e.g. TXbb
+        all_fatjets, jec_shifted_fatjetvars = JEC_loader.get_jec_jets(
             events,
-            fatjets,
+            all_fatjets,
             year,
             isData,
             jecs=utils.jecs,
@@ -476,12 +481,12 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         print("ak8 JECs", f"{time.time() - start:.2f}")
 
         fatjets = objects.good_ak8jets(
-            fatjets, **self.fatjet0_selection, nano_version=self._nano_version
+            all_fatjets, **self.fatjet0_selection, nano_version=self._nano_version
         )
 
-        secondary_fatjets = objects.good_ak8jets(
-            fatjets, **self.fatjet1_selection, nano_version=self._nano_version
-        )
+        # secondary_fatjets = objects.good_ak8jets(
+        #     all_fatjets, **self.fatjet1_selection, nano_version=self._nano_version
+        # )
 
         # VBF objects
         vbf_jets = objects.vbf_jets(
@@ -751,7 +756,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         # 1 AK8 jets passing primary selection, and no jets passing only secondary selection
         add_selection(
             "ak8_singleFatjet",
-            (ak.num(fatjets) == 1) & (ak.num(secondary_fatjets) == 1),
+            (ak.num(fatjets) == 1),  # & (ak.num(secondary_fatjets) == 1),
             *selection_args,
         )
         # >=1 AK8 jets with pT cut (230 GeV by default)
