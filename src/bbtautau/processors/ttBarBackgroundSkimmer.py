@@ -62,6 +62,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
             **P4,
             "rawFactor": "rawFactor",
             "btagPNetB": "btagPNetB",
+            "btagDeepFlavB": "btagDeepFlavB",
         },
         "MET": {
             "pt": "Pt",
@@ -985,6 +986,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
         ###################### Normalization (Step 1) ######################
 
         weight_norm = self.get_dataset_norm(year, dataset)
+        print("year", year, "dataset", dataset, "weight norm", weight_norm)
         # normalize all the weights to xsec, needs to be divided by totals in Step 2 in post-processing
         for key, val in weights_dict.items():
             weights_dict[key] = val * weight_norm
