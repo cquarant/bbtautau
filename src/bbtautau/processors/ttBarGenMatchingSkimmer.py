@@ -416,15 +416,28 @@ class ttBarGenMatchingSkimmer(SkimmerABC):
         genparts = events.GenPart
         genjets = events.GenJet
 
-        # b quarks from t -> bW. distinctParent removes intermediate copies when present.
-        parent_pdgid = genparts.distinctParent.pdgId
+        # b quarks from t -> bW.
+        # IMPORTANT: distinctParent can be None for GenPart entries without a valid parent.
+        # If those None values are left inside the boolean mask, awkward keeps missing
+        # elements in the sliced collection; ak.num then counts them, while the saved pt
+        # becomes PAD_VAL.  Fill missing parents/mask entries explicitly.
+        parent_pdgid = ak.fill_none(genparts.distinctParent.pdgId, 0)
         is_top_b = (
             (abs(genparts.pdgId) == 5)
             & genparts.hasFlags(["fromHardProcess", "isLastCopy"])
             & (abs(parent_pdgid) == 6)
         )
+        is_top_b = ak.fill_none(is_top_b, False)
+
         gen_top_b = genparts[is_top_b]
-        gen_top_b = ak.with_field(gen_top_b, gen_top_b.distinctParent.pdgId, "topParentPdgId")
+        gen_top_b = ak.with_field(
+            gen_top_b,
+            ak.fill_none(gen_top_b.distinctParent.pdgId, 0),
+            "topParentPdgId",
+        )
+
+        # Stable ordering for the saved GenTopB0/1 columns.
+        gen_top_b = gen_top_b[ak.argsort(gen_top_b.pt, axis=1, ascending=False)]
 
         # Keep the original GenJet local index before slicing, useful after flattening/padding.
         genjets = ak.with_field(genjets, ak.local_index(genjets, axis=1), "genJetIdx")
@@ -631,6 +644,8 @@ class ttBarGenMatchingSkimmer(SkimmerABC):
             dataset=dataset,
             nano_version=self._nano_version,
         )
+        print("events.Jet fields:", events.Jet.fields)
+        print("jets fields after JEC:", jets.fields)
 
         if JEC_loader.met_factory is not None:
             met = JEC_loader.met_factory.build(events.MET, jets, {}) if isData else events.MET

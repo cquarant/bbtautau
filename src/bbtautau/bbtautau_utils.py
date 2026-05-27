@@ -11,7 +11,7 @@ def parse_common_run_args(parser):
         required=True,
         help="processor",
         type=str,
-        choices=["skimmer", "ttBarSkimmer", "ttBarGenMatchingSkimmer"],
+        choices=["skimmer", "skimmerTTGenMatching", "ttBarSkimmer", "ttBarGenMatchingSkimmer"],
     )
 
     parser.add_argument(

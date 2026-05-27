@@ -880,7 +880,7 @@ class bbtautauSkimmer(SkimmerABC):
 
         ###################### alpha_S and PDF variations ######################
 
-        if ("HHTobbbb" in dataset or "HHto4B" in dataset) or dataset.startswith("TTTo"):
+        if ("HHTobbbb" in dataset or "HHto4B" in dataset) or ("ttto" in dataset.lower()):
             scale_weights = get_scale_weights(events)
             if scale_weights is not None:
                 weights_dict["scale_weights"] = (
