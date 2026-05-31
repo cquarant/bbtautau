@@ -22,101 +22,101 @@ class HLT(utils.HLT):
 
 class HLTs:
     HLTs: ClassVar[dict[str, list[HLT]]] = {
-        # "pnet": [
-        #     # 2022 + 6fb-1 of 2023
-        #     HLT(
-        #         name="HLT_AK8PFJet250_SoftDropMass40_PFAK8ParticleNetBB0p35",
-        #         mc_years=years_2022,
-        #         data_years=years_2022 + ["2023"],
-        #         dataset="JetMET",
-        #     ),
-        #     HLT(
-        #         name="HLT_AK8PFJet230_SoftDropMass40_PFAK8ParticleNetTauTau0p30",
-        #         mc_years=years_2022,
-        #         data_years=years_2022 + ["2023"],
-        #         dataset="JetMET",
-        #     ),
-        #     # 2023 after 6fb-1, that is from Run2023C_0v2 to Run2023C_0v3
-        #     HLT(
-        #         name="HLT_AK8PFJet230_SoftDropMass40_PNetBB0p06",
-        #         years=years_2023,
-        #         dataset="JetMET",
-        #     ),
-        #     HLT(
-        #         name="HLT_AK8PFJet230_SoftDropMass40_PNetTauTau0p03",
-        #         years=years_2023,
-        #         dataset="JetMET",
-        #     ),
-        # ],
-        # "pfjet": [
-        #     HLT(
-        #         name="HLT_AK8PFJet420_MassSD30",
-        #         years=years,  # years_2023  makes it work in 25Mar7 data samples
-        #         dataset="JetMET",
-        #     ),
-        #     HLT(
-        #         name="HLT_AK8PFJet425_SoftDropMass40",
-        #         years=years,
-        #         dataset="JetMET",
-        #     ),
-        # ],
-        # "quadjet": [
-        #     # 2022 + 6fb-1 of 2023 (moves to Parking after this)
-        #     HLT(
-        #         name="HLT_QuadPFJet70_50_40_35_PFBTagParticleNet_2BTagSum0p65",
-        #         mc_years=years_2022,
-        #         data_years=years_2022,
-        #         dataset="JetMET",
-        #         channel=["hh"],
-        #     ),
-        #     # HLT( #This should be there but is not in 25Apr16 samples. For now just ignore
-        #     #     name="HLT_QuadPFJet70_50_40_35_PNet2BTagMean0p65",
-        #     #     mc_years=[],
-        #     #     data_years=["2023"],
-        #     #     dataset="JetMET",
-        #     # ),
-        #     # 2022 + 2023
-        #     HLT(
-        #         name="HLT_QuadPFJet103_88_75_15_PFBTagDeepJet_1p3_VBF2",
-        #         years=years,
-        #         dataset="JetMET",
-        #         channel=["hh"],
-        #     ),
-        #     HLT(
-        #         name="HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepJet_1p3_7p7_VBF1",
-        #         years=years,
-        #         dataset="JetMET",
-        #         channel=["hh"],
-        #     ),
-        # ],
-        # "singletau": [
-        #     HLT(
-        #         name="HLT_LooseDeepTauPFTauHPS180_L2NN_eta2p1",
-        #         years=years,
-        #         dataset="Tau",
-        #     ),
-        # ],
-        # "ditau": [
-        #     HLT(
-        #         name="HLT_DoubleMediumDeepTauPFTauHPS35_L2NN_eta2p1",
-        #         years=years,
-        #         dataset="Tau",
-        #     ),
-        # ],
-        # "ditaujet": [
-        #     HLT(
-        #         name="HLT_DoubleMediumDeepTauPFTauHPS30_L2NN_eta2p1_PFJet60",
-        #         years=years,
-        #         dataset="Tau",
-        #         channel=["hh"],
-        #     ),
-        #     # HLT(
-        #     #     name="HLT_DoubleMediumDeepTauPFTauHPS30_L2NN_eta2p1_PFJet75",
-        #     #     years=years,
-        #     #     dataset="Tau",
-        #     #     channel=["hh"],
-        #     # ),
-        # ],
+        "pnet": [
+            # 2022 + 6fb-1 of 2023
+            HLT(
+                name="HLT_AK8PFJet250_SoftDropMass40_PFAK8ParticleNetBB0p35",
+                mc_years=years_2022,
+                data_years=years_2022 + ["2023"],
+                dataset="JetMET",
+            ),
+            HLT(
+                name="HLT_AK8PFJet230_SoftDropMass40_PFAK8ParticleNetTauTau0p30",
+                mc_years=years_2022,
+                data_years=years_2022 + ["2023"],
+                dataset="JetMET",
+            ),
+            # 2023 after 6fb-1, that is from Run2023C_0v2 to Run2023C_0v3
+            HLT(
+                name="HLT_AK8PFJet230_SoftDropMass40_PNetBB0p06",
+                years=years_2023,
+                dataset="JetMET",
+            ),
+            HLT(
+                name="HLT_AK8PFJet230_SoftDropMass40_PNetTauTau0p03",
+                years=years_2023,
+                dataset="JetMET",
+            ),
+        ],
+        "pfjet": [
+            HLT(
+                name="HLT_AK8PFJet420_MassSD30",
+                years=years,  # years_2023  makes it work in 25Mar7 data samples
+                dataset="JetMET",
+            ),
+            HLT(
+                name="HLT_AK8PFJet425_SoftDropMass40",
+                years=years,
+                dataset="JetMET",
+            ),
+        ],
+        "quadjet": [
+            # 2022 + 6fb-1 of 2023 (moves to Parking after this)
+            HLT(
+                name="HLT_QuadPFJet70_50_40_35_PFBTagParticleNet_2BTagSum0p65",
+                mc_years=years_2022,
+                data_years=years_2022,
+                dataset="JetMET",
+                channel=["hh"],
+            ),
+            # HLT( #This should be there but is not in 25Apr16 samples. For now just ignore
+            #     name="HLT_QuadPFJet70_50_40_35_PNet2BTagMean0p65",
+            #     mc_years=[],
+            #     data_years=["2023"],
+            #     dataset="JetMET",
+            # ),
+            # 2022 + 2023
+            HLT(
+                name="HLT_QuadPFJet103_88_75_15_PFBTagDeepJet_1p3_VBF2",
+                years=years,
+                dataset="JetMET",
+                channel=["hh"],
+            ),
+            HLT(
+                name="HLT_QuadPFJet103_88_75_15_DoublePFBTagDeepJet_1p3_7p7_VBF1",
+                years=years,
+                dataset="JetMET",
+                channel=["hh"],
+            ),
+        ],
+        "singletau": [
+            HLT(
+                name="HLT_LooseDeepTauPFTauHPS180_L2NN_eta2p1",
+                years=years,
+                dataset="Tau",
+            ),
+        ],
+        "ditau": [
+            HLT(
+                name="HLT_DoubleMediumDeepTauPFTauHPS35_L2NN_eta2p1",
+                years=years,
+                dataset="Tau",
+            ),
+        ],
+        "ditaujet": [
+            HLT(
+                name="HLT_DoubleMediumDeepTauPFTauHPS30_L2NN_eta2p1_PFJet60",
+                years=years,
+                dataset="Tau",
+                channel=["hh"],
+            ),
+            # HLT(
+            #     name="HLT_DoubleMediumDeepTauPFTauHPS30_L2NN_eta2p1_PFJet75",
+            #     years=years,
+            #     dataset="Tau",
+            #     channel=["hh"],
+            # ),
+        ],
         "muon": [
             HLT(
                 name="HLT_IsoMu24",
@@ -124,22 +124,22 @@ class HLTs:
                 dataset="Muon",
                 channel=["hm"],
             ),
-            # # TODO: check sensitivity without below triggers
-            # HLT(
-            #     name="HLT_Mu50",
-            #     years=years,
-            #     dataset="Muon",
-            #     channel=["hm"],
-            # ),
+            # TODO: check sensitivity without below triggers
+            HLT(
+                name="HLT_Mu50",
+                years=years,
+                dataset="Muon",
+                channel=["hm"],
+            ),
         ],
-        # "muontau": [
-        #     HLT(
-        #         name="HLT_IsoMu20_eta2p1_LooseDeepTauPFTauHPS27_eta2p1_CrossL1",
-        #         years=years,
-        #         dataset="Muon",
-        #         channel=["hm"],
-        #     ),
-        # ],
+        "muontau": [
+            HLT(
+                name="HLT_IsoMu20_eta2p1_LooseDeepTauPFTauHPS27_eta2p1_CrossL1",
+                years=years,
+                dataset="Muon",
+                channel=["hm"],
+            ),
+        ],
         "egamma": [
             HLT(
                 name="HLT_Ele30_WPTight_Gsf",
@@ -147,55 +147,55 @@ class HLTs:
                 dataset="EGamma",
                 channel=["he"],
             ),
-            # HLT(
-            #     name="HLT_Ele115_CaloIdVT_GsfTrkIdT",
-            #     years=years,
-            #     dataset="EGamma",
-            #     channel=["he"],
-            # ),
-            # HLT(
-            #     name="HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165",
-            #     years=years,
-            #     dataset="EGamma",
-            #     channel=["he"],
-            # ),
-            # HLT(
-            #     name="HLT_Photon200",
-            #     years=years,
-            #     dataset="EGamma",
-            #     channel=["he"],
-            # ),
+            HLT(
+                name="HLT_Ele115_CaloIdVT_GsfTrkIdT",
+                years=years,
+                dataset="EGamma",
+                channel=["he"],
+            ),
+            HLT(
+                name="HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165",
+                years=years,
+                dataset="EGamma",
+                channel=["he"],
+            ),
+            HLT(
+                name="HLT_Photon200",
+                years=years,
+                dataset="EGamma",
+                channel=["he"],
+            ),
         ],
-        # "etau": [
-        #     HLT(
-        #         name="HLT_Ele24_eta2p1_WPTight_Gsf_LooseDeepTauPFTauHPS30_eta2p1_CrossL1",
-        #         years=years,
-        #         dataset="EGamma",
-        #         channel=["he"],
-        #     ),
-        # ],
-        # "met": [
-        #     HLT(
-        #         name="HLT_PFMET120_PFMHT120_IDTight",
-        #         years=years,
-        #         dataset="JetMET",
-        #     ),
-        # ],
-        # "parking": [
-        #     # Moved to Parking in 2023 after 6fb-1
-        #     HLT(
-        #         name="HLT_PFHT280_QuadPFJet30_PNet2BTagMean0p55",
-        #         years=["2023BPix"],
-        #         dataset="ParkingHH",
-        #         channel=["hh"],
-        #     ),
-        #     HLT(
-        #         name="HLT_PFHT340_QuadPFJet70_50_40_40_PNet2BTagMean0p70",
-        #         years=years_2023,
-        #         dataset="ParkingHH",
-        #         channel=["hh"],
-        #     ),
-        # ],
+        "etau": [
+            HLT(
+                name="HLT_Ele24_eta2p1_WPTight_Gsf_LooseDeepTauPFTauHPS30_eta2p1_CrossL1",
+                years=years,
+                dataset="EGamma",
+                channel=["he"],
+            ),
+        ],
+        "met": [
+            HLT(
+                name="HLT_PFMET120_PFMHT120_IDTight",
+                years=years,
+                dataset="JetMET",
+            ),
+        ],
+        "parking": [
+            # Moved to Parking in 2023 after 6fb-1
+            HLT(
+                name="HLT_PFHT280_QuadPFJet30_PNet2BTagMean0p55",
+                years=["2023BPix"],
+                dataset="ParkingHH",
+                channel=["hh"],
+            ),
+            HLT(
+                name="HLT_PFHT340_QuadPFJet70_50_40_40_PNet2BTagMean0p70",
+                years=years_2023,
+                dataset="ParkingHH",
+                channel=["hh"],
+            ),
+        ],
     }
 
     @classmethod
