@@ -36,14 +36,17 @@ def path_dict(path: str, path_2022: str = None):
 
 MAIN_DIR = Path("../../")
 MODEL_DIR = Path(
-    "/home/users/lumori/bbtautau/src/bbtautau/postprocessing/classifier/trained_models"
+    "/afs/cern.ch/work/c/cquarant/Hbt2/bbtautau/src/bbtautau/postprocessing/classifier/trained_models"
 )
-CLASSIFIER_DIR = Path("/home/users/lumori/bbtautau/src/bbtautau/postprocessing/classifier/")
+CLASSIFIER_DIR = Path(
+    "/afs/cern.ch/work/c/cquarant/Hbt2/bbtautau/src/bbtautau/postprocessing/classifier/trained_models"
+)
 BDT_EVAL_DIR = Path("/ceph/cms/store/user/lumori/bbtautau/BDT_predictions/")
-DATA_DIR = "/ceph/cms/store/user/lumori/bbtautau/skimmer/25Sep23AddVars_v12_private_signal"
+DATA_DIR = "/eos/user/j/jinwa/download_test/26Mar5All_v12_private_signal/"
+# DATA_DIR = "/eos/home-c/cquarant/bbtautau/skimmer/TTtoLNuGenMatching_2023BPix_v12_private_signal/"
 DATA_PATHS = path_dict(DATA_DIR)
 
-PLOT_DIR = Path("/home/users/lumori/bbtautau/plots")
+PLOT_DIR = Path("/eos/home-c/cquarant/www/test")
 
 # backwards compatibility
 # data_dir_2022 = "/ceph/cms/store/user/rkansal/bbtautau/skimmer/25Apr17bbpresel_v12_private_signal"
