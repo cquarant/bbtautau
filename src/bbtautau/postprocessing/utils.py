@@ -192,6 +192,7 @@ def get_columns(
     leptons: bool = True,
     other: bool = True,
     lowercase_jetaway: bool = False,
+    ak4_gen_matching: bool = False,
 ):
 
     columns_data = [
@@ -199,10 +200,10 @@ def get_columns(
         ("ak8FatJetPt", 3),
         ("ak8FatJetEta", 3),
         ("ak8FatJetPhi", 3),
-        ("ak4JetPt", 3),
-        ("ak4JetEta", 3),
-        ("ak4JetPhi", 3),
-        ("ak4JetMass", 3),
+        ("ak4JetPt", 4),
+        ("ak4JetEta", 4),
+        ("ak4JetPhi", 4),
+        ("ak4JetMass", 4),
     ]
     if lowercase_jetaway:
         columns_data += [
@@ -274,6 +275,12 @@ def get_columns(
         for branch in triggers_in_channel.triggers(year, mc_only=True):
             columns_mc.append((branch, 1))
 
+    if ak4_gen_matching:
+        columns_mc += [
+            ("ak4JetMatchedTopBGenJetPt", 4),
+            ("ak4JetMatchedTopBGenJetEta", 4),
+            ("ak4JetMatchedTopBGenJetPhi", 4),
+        ]
     # signal-only columns
     columns_signal = copy.deepcopy(columns_mc)
 
@@ -957,11 +964,13 @@ def load_data_channel(
     channel: Channel,
     test_mode: bool,
     tt_pres: bool,
+    load_data: bool = True,
     models: list[str] | None = None,
     model_dir: Path = MODEL_DIR,
     bdt_eval_dir: Path = BDT_EVAL_DIR,
     at_inference: bool = False,
     cutflow: bool = False,
+    ak4_gen_matching: bool = False,
     **kwargs,
 ):
     """Load data for all years and signals for a given channel."""
@@ -977,13 +986,14 @@ def load_data_channel(
                 channel=channel, in_filters=filters_dict, num_fatjets=3, tt_cut=0.3
             )
 
-        columns = get_columns(year, triggers_in_channel=channel)
+        columns = get_columns(year, triggers_in_channel=channel, ak4_gen_matching=ak4_gen_matching)
 
         events_dict[year] = load_samples(
             year=year,
             paths=DATA_PATHS[year],
             signals=signals,
             channels=[channel],
+            load_data=load_data,
             filters_dict=filters_dict,
             load_columns=columns,
             restrict_data_to_channel=True,
@@ -1016,11 +1026,13 @@ def load_data_channel(
     # (e.g., ggf model should only be used with ggfbbtt signal_objective, vbf model with vbfbbtt)
     if models is not None:
         for model in models:
+            print("loading BDT predictions for model:", model, "for signals:", signals)
             for sig in signals:
                 # Match model to signal: model name should contain the signal base name
                 # e.g., "ggfbbtt" model matches "ggfbbtt" signal, "vbfbbtt" model matches "vbfbbtt" signal
                 # This prevents VBF model from overwriting GGF discriminator columns when signal_objective="ggfbbtt"
                 sig_base = sig.removesuffix("tt") if sig.endswith("tt") else sig
+                print("sig_base:", sig_base, "model:", model.lower())
                 # Needed this minimal fix and now it works. But still some redundant logic with modelname and signal_objective could be merged in a dictionary. signal_objective needed to label the BDT branches
                 if sig_base in model.lower():
                     compute_or_load_bdt_preds(
