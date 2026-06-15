@@ -64,10 +64,14 @@ def main(args):
         args.prescale_factor,
     )
 
-    save_parquet = {"skimmer": True}[args.processor]
-    save_root = {"skimmer": True}[args.processor]
-    save_parquet = {"skimmer": True, "skimmerTTGenMatching": True}[args.processor]
-    save_root = {"skimmer": True, "skimmerTTGenMatching": True}[args.processor]
+    save_parquet = {
+        "skimmer": True,
+        "skimmerTTGenMatching": True,
+    }[args.processor]
+    save_root = {
+        "skimmer": True,
+        "skimmerTTGenMatching": True,
+    }[args.processor]
 
     skipbadfiles = True
 
