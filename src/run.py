@@ -39,6 +39,18 @@ def get_processor(
             fatjet_bb_preselection=fatjet_bb_preselection,
             prescale_factor=prescale_factor,
         )
+    elif processor == "skimmerTTGenMatching":
+        from bbtautau.processors import bbtautauSkimmerTTGenMatching
+
+        return bbtautauSkimmerTTGenMatching(
+            xsecs=xsecs,
+            save_systematics=save_systematics,
+            region=region,
+            nano_version=nano_version,
+            fatjet_pt_cut=fatjet_pt_cut,
+            fatjet_bb_preselection=fatjet_bb_preselection,
+            prescale_factor=prescale_factor,
+        )
 
 
 def main(args):
@@ -54,6 +66,8 @@ def main(args):
 
     save_parquet = {"skimmer": True}[args.processor]
     save_root = {"skimmer": True}[args.processor]
+    save_parquet = {"skimmer": True, "skimmerTTGenMatching": True}[args.processor]
+    save_root = {"skimmer": True, "skimmerTTGenMatching": True}[args.processor]
 
     skipbadfiles = True
 
