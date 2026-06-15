@@ -60,11 +60,14 @@ CLASSIFIER_DIR = _PACKAGE_ROOT / "postprocessing" / "classifier"
 _user = _username()
 _repo_name = _REPO_ROOT.name
 # Skimmer ntuple path (shared bbtautau skimmer tag on ceph)
-_default_data_dir = "/ceph/cms/store/user/lumori/bbtautau/skimmer/26Mar5All_v12_private_signal"
+# _default_data_dir = "/eos/user/j/jinwa/download_test/26Mar5All_v12_private_signal/"
+_default_data_dir = "/eos/home-c/cquarant/bbtautau/skimmer/TTtoLNuGenMatching_v12_private_signal/"
 DATA_DIR = os.environ.get("BBTAUTAU_DATA_DIR", _default_data_dir)
 DATA_PATHS = path_dict(DATA_DIR)
 
-_default_bdt_eval = f"/ceph/cms/store/user/{_user}/{_repo_name}/BDT_predictions/"
+_default_bdt_eval = (
+    "/afs/cern.ch/work/c/cquarant/Hbt2/bbtautau/src/bbtautau/postprocessing/BDT_predictions/"
+)
 BDT_EVAL_DIR = Path(os.environ.get("BBTAUTAU_BDT_EVAL_DIR", _default_bdt_eval))
 
 PLOT_DIR = _REPO_ROOT / "plots"
