@@ -60,8 +60,8 @@ CLASSIFIER_DIR = _PACKAGE_ROOT / "postprocessing" / "classifier"
 _user = _username()
 _repo_name = _REPO_ROOT.name
 # Skimmer ntuple path (shared bbtautau skimmer tag on ceph)
-# _default_data_dir = "/eos/user/j/jinwa/download_test/26Mar5All_v12_private_signal/"
-_default_data_dir = "/eos/home-c/cquarant/bbtautau/skimmer/TTtoLNuGenMatching_v12_private_signal/"
+_default_data_dir = "/eos/user/j/jinwa/download_test/26Mar5All_v12_private_signal/"
+# _default_data_dir = "/eos/home-c/cquarant/bbtautau/skimmer/TTGenMatching_v12_private_signal/"
 DATA_DIR = os.environ.get("BBTAUTAU_DATA_DIR", _default_data_dir)
 DATA_PATHS = path_dict(DATA_DIR)
 

@@ -186,6 +186,7 @@ SIGNALS = [
 SIGNALS_CHANNELS = []
 
 SM_SIGNALS = ["ggfbbtt", "vbfbbtt"]
+# SM_SIGNALS = []
 SM_SIGNALS_CHANNELS = []
 
 sig_keys_ggf = ["ggfbbtt", "ggfbbtt-kl0p00", "ggfbbtt-kl2p45", "ggfbbtt-kl5p00"]
