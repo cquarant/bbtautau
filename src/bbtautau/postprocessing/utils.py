@@ -209,6 +209,7 @@ def get_columns(
     other: bool = True,
     lowercase_jetaway: bool = False,
     vbf: bool = True,
+    ak4_gen_matching: bool = False,
 ):
 
     columns_data = [
@@ -217,10 +218,10 @@ def get_columns(
         ("ak8FatJetEta", 3),
         ("ak8FatJetPhi", 3),
         ("ak8FatJetTau3OverTau2", 3),
-        ("ak4JetPt", 3),
-        ("ak4JetEta", 3),
-        ("ak4JetPhi", 3),
-        ("ak4JetMass", 3),
+        ("ak4JetPt", 4),
+        ("ak4JetEta", 4),
+        ("ak4JetPhi", 4),
+        ("ak4JetMass", 4),
     ]
     if lowercase_jetaway:
         columns_data += [
@@ -304,6 +305,15 @@ def get_columns(
         for branch in triggers_in_channel.triggers(year, mc_only=True):
             columns_mc.append((branch, 1))
 
+    if ak4_gen_matching:
+        columns_mc += [
+            ("ak4JetMatchedTopBGenJetPt", 4),
+            ("ak4JetMatchedTopBGenJetEta", 4),
+            ("ak4JetMatchedTopBGenJetPhi", 4),
+            ("GenTopBPt", 2),
+            ("GenTopBEta", 2),
+            ("GenTopBPhi", 2),
+        ]
     # signal-only columns
     columns_signal = copy.deepcopy(columns_mc)
 
@@ -415,7 +425,8 @@ def load_samples(
 
     if samples is None:
         samples = Samples.SAMPLES.copy()
-
+        print("No samples provided, using default samples from Samples.SAMPLES")
+        print("samples keys:", list(samples.keys()))
         if not load_bgs:
             for key in Samples.BGS:
                 if key in samples:
@@ -438,6 +449,9 @@ def load_samples(
         for channel in channels:
             for key in Samples.DATASETS:
                 if (key in samples) and (key not in channel.data_samples):
+                    print(
+                        f"Restricting data loading to channel {channel.key}: removing sample {key}"
+                    )
                     del samples[key]
 
     if additional_samples is not None:
@@ -524,6 +538,9 @@ def load_samples(
                 ]
                 del events_dict[signal]
             else:
+                print(
+                    f"Extracting channel {channel.key} for signal {signal} with GenTau{channel.key} mask"
+                )
                 events_dict[f"{signal}{channel.key}"] = LoadedSample(
                     sample=Samples.SAMPLES[f"{signal}{channel.key}"],
                     events=events_dict[signal].events[
@@ -923,7 +940,7 @@ def derive_variables(
             Xbb_vs_QCD = np.divide(Xbb, Xbb + QCD, out=np.zeros_like(Xbb), where=(Xbb + QCD) != 0)
 
             for n in range(num_fatjets):
-                sample.events[("ak8FatJetPNetXbbvsQCDLegacy", str(n))] = Xbb_vs_QCD[:, n]
+                sample.events.loc[:, ("ak8FatJetPNetXbbvsQCDLegacy", str(n))] = Xbb_vs_QCD[:, n]
 
         if channel is not None:
             if channel.key == "hm" and "ak8FatJetParTXtauhtaumvsQCDTop" not in sample.events:
@@ -938,9 +955,9 @@ def derive_variables(
                 )
 
                 for n in range(num_fatjets):
-                    sample.events[("ak8FatJetParTXtauhtaumvsQCDTop", str(n))] = tauhtaum_vs_QCDTop[
-                        :, n
-                    ]
+                    sample.events.loc[:, ("ak8FatJetParTXtauhtaumvsQCDTop", str(n))] = (
+                        tauhtaum_vs_QCDTop[:, n]
+                    )
 
             if channel.key == "hm" and "ak8FatJetParTXtauhtaumvsQCD" not in sample.events:
                 tauhtaum_vs_QCD = np.divide(
@@ -950,7 +967,9 @@ def derive_variables(
                     where=(tauhtaum + qcd) != 0,
                 )
                 for n in range(num_fatjets):
-                    sample.events[("ak8FatJetParTXtauhtaumvsQCD", str(n))] = tauhtaum_vs_QCD[:, n]
+                    sample.events.loc[:, ("ak8FatJetParTXtauhtaumvsQCD", str(n))] = tauhtaum_vs_QCD[
+                        :, n
+                    ]
 
 
 def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
@@ -958,14 +977,14 @@ def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
 
         for n in range(sample.get_var("ElectronEta").shape[-1]):
 
-            sample.events[("ElectronDeltaEta", str(n))] = (
+            sample.events.loc[:, ("ElectronDeltaEta", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("ElectronPhi"))[:, n]
             )
             sample.events.loc[sample.e_mask[:, n], ("ElectronDeltaEta", str(n))] = delta_eta(
                 sample.get_var("ElectronEta")[:, n], sample.get_var("ttFatJetEta")
             )[sample.e_mask[:, n]]
 
-            sample.events[("ElectronDeltaPhi", str(n))] = (
+            sample.events.loc[:, ("ElectronDeltaPhi", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("ElectronPhi"))[:, n]
             )
             sample.events.loc[sample.e_mask[:, n], ("ElectronDeltaPhi", str(n))] = delta_phi(
@@ -975,7 +994,7 @@ def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
         # need first to create the full branch before slicing
         for n in range(sample.get_var("ElectronEta").shape[-1]):
 
-            sample.events[("Electron_dRak8Jet", str(n))] = (
+            sample.events.loc[:, ("Electron_dRak8Jet", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("ElectronPhi"))[:, n]
             )
             sample.events.loc[sample.e_mask[:, n], ("Electron_dRak8Jet", str(n))] = np.sqrt(
@@ -985,14 +1004,14 @@ def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
 
         for n in range(sample.get_var("MuonEta").shape[-1]):
 
-            sample.events[("MuonDeltaEta", str(n))] = (
+            sample.events.loc[:, ("MuonDeltaEta", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("MuonPhi"))[:, n]
             )
             sample.events.loc[sample.m_mask[:, n], ("MuonDeltaEta", str(n))] = delta_eta(
                 sample.get_var("MuonEta")[:, n], sample.get_var("ttFatJetEta")
             )[sample.m_mask[:, n]]
 
-            sample.events[("MuonDeltaPhi", str(n))] = (
+            sample.events.loc[:, ("MuonDeltaPhi", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("MuonPhi"))[:, n]
             )
             sample.events.loc[sample.m_mask[:, n], ("MuonDeltaPhi", str(n))] = delta_phi(
@@ -1001,7 +1020,7 @@ def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
 
         for n in range(sample.get_var("MuonEta").shape[-1]):
 
-            sample.events[("Muon_dRak8Jet", str(n))] = (
+            sample.events.loc[:, ("Muon_dRak8Jet", str(n))] = (
                 PAD_VAL * np.ones_like(sample.get_var("MuonPhi"))[:, n]
             )
             sample.events.loc[sample.m_mask[:, n], ("Muon_dRak8Jet", str(n))] = np.sqrt(
@@ -1013,7 +1032,7 @@ def derive_lepton_variables(events_dict: dict[str, LoadedSample]):
 
 def derive_vbf_variables(events_dict: dict[str, LoadedSample]):
     for sample in events_dict.values():
-        sample.events[("VBFJetDeltaEta", 0)] = delta_eta(
+        sample.events.loc[:, ("VBFJetDeltaEta", 0)] = delta_eta(
             sample.get_var("VBFJetEta")[:, 0], sample.get_var("VBFJetEta")[:, 1]
         )
 
@@ -1037,7 +1056,7 @@ def derive_vbf_variables(events_dict: dict[str, LoadedSample]):
 
         # Add 4-vectors and compute invariant mass
         vbf_dijet = vbf_jet0 + vbf_jet1
-        sample.events[("VBFMassjj", 0)] = vbf_dijet.mass
+        sample.events.loc[:, ("VBFMassjj", 0)] = vbf_dijet.mass
 
 
 def load_data_channel(
@@ -1053,6 +1072,7 @@ def load_data_channel(
     cutflow: bool = False,
     ttvsbb: bool = True,
     unbiased_mc_eval: bool = True,
+    ak4_gen_matching: bool = False,
     **kwargs,
 ):
     """Load data for all years and signals for a given channel."""
@@ -1068,7 +1088,7 @@ def load_data_channel(
                 channel=channel, in_filters=filters_dict, num_fatjets=3, qcd_only=False
             )
 
-        columns = get_columns(year, triggers_in_channel=channel)
+        columns = get_columns(year, triggers_in_channel=channel, ak4_gen_matching=ak4_gen_matching)
 
         events_dict[year] = load_samples(
             year=year,
