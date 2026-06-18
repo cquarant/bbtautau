@@ -1216,7 +1216,7 @@ def _apply_unbiased_mc_eval(
     weight_series = events["finalWeight"]
     total_weight_pre = float(np.sum(np.asarray(weight_series).squeeze()))
 
-    sample_data.events = events.iloc[val_mask].reset_index(drop=True)
+    sample_data.events = events.iloc[val_mask].copy().reset_index(drop=True)
     if sample_data.bb_mask is not None:
         sample_data.bb_mask = sample_data.bb_mask[val_mask]
     if sample_data.tt_mask is not None:
