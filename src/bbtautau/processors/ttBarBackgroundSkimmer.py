@@ -801,7 +801,7 @@ class ttBarBackgroundSkimmer(SkimmerABC):
 
         # 1 Electron or 1 Muon passing selection
         add_selection(
-            "singleLepton", (ak.num(electrons) == 1) | (ak.num(muons) == 1), *selection_args
+            "singleLepton", (ak.num(electrons) >= 1) | (ak.num(muons) >= 1), *selection_args
         )
 
         # >=1 AK8 jets with mass cut (230 GeV by default)
