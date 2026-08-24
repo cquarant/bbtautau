@@ -81,6 +81,21 @@ def get_processor(
             prescale_factor=prescale_factor,
         )
 
+    elif processor == "ttBarSkimmerFatJetCategories":
+        from bbtautau.processors.ttBarSkimmerFatJetCategories import (
+            ttBarSkimmerFatJetCategories,
+        )
+
+        return ttBarSkimmerFatJetCategories(
+            xsecs=xsecs,
+            save_systematics=save_systematics,
+            region=region,
+            nano_version=nano_version,
+            fatjet_pt_cut=fatjet_pt_cut,
+            fatjet_bb_preselection=fatjet_bb_preselection,
+            prescale_factor=prescale_factor,
+        )
+
     raise ValueError(f"Unknown processor: {processor}")
 
 
@@ -100,12 +115,14 @@ def main(args):
         "skimmerTTGenMatching": True,
         "ttBarSkimmer": True,
         "ttBarGenMatchingSkimmer": True,
+        "ttBarSkimmerFatJetCategories": True,
     }[args.processor]
     save_root = {
         "skimmer": True,
         "skimmerTTGenMatching": True,
         "ttBarSkimmer": True,
         "ttBarGenMatchingSkimmer": True,
+        "ttBarSkimmerFatJetCategories": True,
     }[args.processor]
 
     skipbadfiles = True

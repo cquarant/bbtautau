@@ -1681,14 +1681,14 @@ Examples:
     )
     disc_group.add_argument(
         "--ggf-modelname",
-        default="19oct25_ak4away_ggfbbtt",
-        help="BDT model name for ggF (default: 19oct25_ak4away_ggfbbtt)",
+        default="May4_optimized_ggf",
+        help="BDT model name for ggF (default: May4_optimized_ggf)",
     )
     disc_group.add_argument(
         "--vbf-modelname",
         type=str,
-        default="19oct25_ak4away_vbfbbtt",
-        help="BDT model name for VBF (default: 19oct25_ak4away_vbfbbtt)",
+        default="May4_optimized_vbf",
+        help="BDT model name for VBF (default: May4_optimized_vbf)",
     )
     disc_group.add_argument(
         "--bdt-dir",

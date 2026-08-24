@@ -129,7 +129,28 @@ class ttBarGenMatchingSkimmer(SkimmerABC):
         "mreg": 0,
     }
 
-    lepton_selection: ClassVar[dict[str, float]] = {
+    electron_selection_tight: ClassVar[dict[str, float]] = {
+        "ptcut": 30,
+        "etacut": 2.5,
+        "dzcut": 0.2,
+        "dxycut": 0.045,
+    }
+
+    electron_selection_loose: ClassVar[dict[str, float]] = {
+        "ptcut": 30,
+        "etacut": 2.5,
+        "dzcut": 0.2,
+        "dxycut": 0.045,
+    }
+
+    muon_selection_tight: ClassVar[dict[str, float]] = {
+        "ptcut": 30,
+        "etacut": 2.5,
+        "dzcut": 0.2,
+        "dxycut": 0.045,
+    }
+
+    muon_selection_loose: ClassVar[dict[str, float]] = {
         "ptcut": 30,
         "etacut": 2.5,
         "dzcut": 0.2,
@@ -984,7 +1005,7 @@ class ttBarGenMatchingSkimmer(SkimmerABC):
         )
 
         # don't apply triggers for now, for trigger studies etc.
-        apply_trigger = True
+        apply_trigger = False
         if apply_trigger:
             add_selection("trigger", HLT_triggered, *selection_args)
 
@@ -999,10 +1020,10 @@ class ttBarGenMatchingSkimmer(SkimmerABC):
         cut_jetveto = get_jetveto_event(jets, year)
         add_selection("ak4_jetveto", cut_jetveto, *selection_args)
 
-        # 1 Electron or 1 Muon passing selection
-        add_selection(
-            "singleLepton", (ak.num(electrons) == 1) | (ak.num(muons) == 1), *selection_args
-        )
+        # # 1 Electron or 1 Muon passing selection
+        # add_selection(
+        #     "singleLepton", (ak.num(electrons) == 1) | (ak.num(muons) == 1), *selection_args
+        # )
 
         # >=1 AK8 jets with mass cut (230 GeV by default)
         if self.fatjet_selection["mass"] >= 0:  # if < 0, don't apply any fatjet selection
